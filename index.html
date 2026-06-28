@@ -10,8 +10,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#07050d;color:#e0d8f
 #bgvid{position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:0;pointer-events:none;opacity:.5}
 .overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,rgba(7,5,13,.85),rgba(7,5,13,.6),rgba(7,5,13,.85));z-index:1;pointer-events:none}
 .content{position:relative;z-index:2;width:100%;max-width:640px;padding:60px 24px;display:flex;flex-direction:column;align-items:center;gap:40px}
-.logo img{width:56px;height:56px;display:block}
-.logo h1{font-size:24px;font-weight:800;letter-spacing:6px;color:#c4b5fd;margin-top:4px}
+.logo{display:flex;flex-direction:column;align-items:center;gap:8px}
+.logo img{width:56px;height:56px}
+.logo h1{font-size:24px;font-weight:800;letter-spacing:6px;color:#c4b5fd}
 .tagline{text-align:center;max-width:480px;font-size:14px;color:#8870a8;line-height:1.7}
 .tagline strong{color:#c4b5fd}
 .pills{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
@@ -29,6 +30,9 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
 .release{font-size:12px;color:#554070;text-align:center}
 .release a{color:#7c3aed;text-decoration:none}
 .release a:hover{color:#c4b5fd}
+.nav{display:flex;gap:16px;font-size:12px}
+.nav a{color:#554070;text-decoration:none}
+.nav a:hover{color:#c4b5fd}
 @media(max-width:480px){.features{grid-template-columns:1fr}.content{padding:40px 16px;gap:32px}}
 </style>
 </head>
@@ -81,7 +85,8 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
   </div>
   <hr>
   <div class="release">
-    <p>Release <a href="https://github.com/ValTheOneAndOnly/nexus/releases">v1.0</a></p>
+    <div class="nav"><a href="info.html">What's inside?</a></div>
+    <p style="margin-top:8px">Release <a href="https://github.com/ValTheOneAndOnly/nexus/releases">v1.0</a></p>
     <p style="margin-top:4px">ValTheOneAndOnly &middot; 2026</p>
   </div>
 </div>
