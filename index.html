@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus Optimizer</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#07050d;color:#e0d8f0;overflow-x:hidden;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+#bgvid{position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:0;pointer-events:none;opacity:.5}
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,rgba(7,5,13,.85),rgba(7,5,13,.6),rgba(7,5,13,.85));z-index:1;pointer-events:none}
+.content{position:relative;z-index:2;width:100%;max-width:640px;padding:60px 24px;display:flex;flex-direction:column;align-items:center;gap:40px}
+.logo img{width:56px;height:56px;display:block}
+.logo h1{font-size:24px;font-weight:800;letter-spacing:6px;color:#c4b5fd;margin-top:4px}
+.tagline{text-align:center;max-width:480px;font-size:14px;color:#8870a8;line-height:1.7}
+.tagline strong{color:#c4b5fd}
+.pills{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.pill{font-size:10px;font-weight:700;padding:4px 10px;border-radius:4px;background:#1a1030;color:#8870a8;border:1px solid #2a1f40;letter-spacing:.5px;text-transform:uppercase}
+.download{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
+.btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;padding:12px 32px;border-radius:6px;font-size:14px;font-weight:700;text-decoration:none;transition:opacity .15s;border:none;cursor:pointer;letter-spacing:.5px}
+.btn:hover{opacity:.85}
+.btn svg{width:18px;height:18px}
+.meta{display:flex;gap:16px;font-size:11px;color:#554070}
+.meta span{display:flex;align-items:center;gap:4px}
+.features{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.feature{padding:12px;background:rgba(26,16,48,.7);border:1px solid #2a1f40;border-radius:4px;font-size:12px;color:#9880b8}
+.feature .head{font-weight:700;color:#c4b5fd;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+hr{width:40px;height:1px;border:none;background:#2a1f40}
+.release{font-size:12px;color:#554070;text-align:center}
+.release a{color:#7c3aed;text-decoration:none}
+.release a:hover{color:#c4b5fd}
+@media(max-width:480px){.features{grid-template-columns:1fr}.content{padding:40px 16px;gap:32px}}
+</style>
+</head>
+<body>
+<video id="bgvid" src="bg.mp4" autoplay loop muted playsinline></video>
+<div class="overlay"></div>
+<div class="content">
+  <div class="logo">
+    <img src="icon.png" alt="Nexus">
+    <h1>NEXUS</h1>
+  </div>
+  <div class="tagline">
+    <p>Your FPS back. No bloat. Just toggles and graphs.</p>
+  </div>
+  <div class="pills">
+    <span class="pill">Portable</span>
+    <span class="pill">Win 10/11</span>
+    <span class="pill">x64</span>
+    <span class="pill">Free</span>
+  </div>
+  <div class="download">
+    <a href="https://github.com/ValTheOneAndOnly/nexus/releases/download/v1.0/Nexus.exe" class="btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7l7 7 7-7"/></svg>
+      Download v1.0
+    </a>
+    <div class="meta">
+      <span>144 MB</span>
+      <span>Single-file</span>
+      <span>No installer</span>
+    </div>
+  </div>
+  <hr>
+  <div class="features">
+    <div class="feature">
+      <div class="head">Live Graphs</div>
+      CPU, GPU, RAM, Disk — real-time sparklines
+    </div>
+    <div class="feature">
+      <div class="head">Toggle &amp; Apply</div>
+      One click enable, instant revert. No Apply button
+    </div>
+    <div class="feature">
+      <div class="head">42 Tweaks</div>
+      CPU, GPU, System, Network, Services, Privacy
+    </div>
+    <div class="feature">
+      <div class="head">Reversible</div>
+      Every tweak can be undone. State saved to registry
+    </div>
+  </div>
+  <hr>
+  <div class="release">
+    <p>Release <a href="https://github.com/ValTheOneAndOnly/nexus/releases">v1.0</a></p>
+    <p style="margin-top:4px">ValTheOneAndOnly &middot; 2026</p>
+  </div>
+</div>
+</body>
+</html>
