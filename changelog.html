@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus — Changelog</title>
+<link rel="icon" href="icon.png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#07050d;color:#e0d8f0;overflow-x:hidden;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+#bgvid{position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:0;pointer-events:none;opacity:.5}
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,rgba(7,5,13,.85),rgba(7,5,13,.6),rgba(7,5,13,.85));z-index:1;pointer-events:none}
+.topbar{position:fixed;top:16px;right:24px;z-index:3;display:flex;gap:6px}
+.backbtn{display:inline-flex;align-items:center;gap:6px;background:#1a1030;color:#8870a8;border:1px solid #2a1f40;border-radius:4px;padding:8px 14px;font-size:12px;font-weight:600;text-decoration:none;cursor:pointer;transition:border-color .15s,color .15s;letter-spacing:.5px}
+.backbtn:hover{border-color:#7c3aed;color:#c4b5fd}
+.content{position:relative;z-index:2;width:100%;max-width:540px;padding:60px 24px;display:flex;flex-direction:column;align-items:center;gap:28px}
+.logo{display:flex;flex-direction:column;align-items:center;gap:6px}
+.logo img{width:48px;height:48px}
+.logo h1{font-size:20px;font-weight:800;letter-spacing:5px;color:#c4b5fd}
+h2{font-size:14px;font-weight:700;color:#c4b5fd;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+p{font-size:13px;color:#9880b8;line-height:1.7}
+.section{width:100%;display:flex;flex-direction:column}
+hr{width:40px;height:1px;border:none;background:#2a1f40}
+.entry{padding:10px 12px;background:rgba(26,16,48,.5);border:1px solid #2a1f40;border-radius:3px;margin-bottom:6px}
+.entry .ver{font-size:13px;font-weight:700;color:#c4b5fd;margin-bottom:4px}
+.entry .date{font-size:11px;color:#554070;margin-bottom:6px}
+.entry ul{margin:0;padding-left:16px}
+.entry li{font-size:12px;color:#9880b8;line-height:1.8}
+</style>
+</head>
+<body>
+<video id="bgvid" src="bg.mp4" autoplay loop muted playsinline></video>
+<div class="overlay"></div>
+<div class="topbar">
+  <a href="info.html" class="backbtn">info</a>
+  <a href="index.html" class="backbtn">← Back</a>
+</div>
+<div class="content">
+  <div class="logo">
+    <img src="icon.png" alt="Nexus">
+    <h1>CHANGELOG</h1>
+  </div>
+
+  <div class="section">
+    <h2>v1.1 — 2026</h2>
+    <div class="entry">
+      <div class="date">Latest build</div>
+      <ul>
+        <li>Initial public release with 58 tweaks (CPU, GPU, System, Network)</li>
+        <li>Live monitoring: CPU, multi-GPU (PerfCounters + NVML + WMI fallback), RAM, Disk</li>
+        <li>Filter system with purple highlight states and performance visibility toggle</li>
+        <li>Loading splash overlay with initialization progress</li>
+        <li>MMCSS foreground priority tweak (<strong>sys_mmcss</strong>)</li>
+        <li>Network throttling removal tweak (<strong>net_throttle</strong>)</li>
+        <li>System Restore integration with auto-restore-point creation</li>
+        <li>Discord suggestion flow — DM ValTheOneAndOnly</li>
+        <li>Reviews page with inline GitHub Issues form (PAT auth)</li>
+        <li>GPU engine-grouping matching Task Manager display</li>
+        <li>Embedded thunderstorm video background</li>
+        <li>Single-file portable .NET 8 build (~144 MB)</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="logo" style="gap:4px">
+    <img src="icon.png" alt="Nexus" style="width:32px;height:32px">
+    <h1 style="font-size:14px;letter-spacing:4px">NEXUS</h1>
+  </div>
+  <p style="font-size:11px;color:#554070">ValTheOneAndOnly &middot; 2026</p>
+</div>
+</body>
+</html>
