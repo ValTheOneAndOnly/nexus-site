@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
 <title>Nexus — Reviews</title>
 <link rel="icon" href="icon.png">
 <style>
@@ -31,11 +33,8 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
 .review-card .meta{font-size:11px;color:#554070;margin-bottom:2px}
 .review-card .body{font-size:12px;color:#9880b8;line-height:1.6}
 .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.action-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;cursor:pointer;transition:border-color .15s,color .15s;letter-spacing:.5px}
-.action-btn.review{background:#1a1030;color:#8870a8;border:1px solid #2a1f40}
-.action-btn.review:hover{border-color:#7c3aed;color:#c4b5fd}
-.action-btn.suggest{background:#1a1030;color:#8870a8;border:1px solid #2a1f40}
-.action-btn.suggest:hover{border-color:#7c3aed;color:#c4b5fd}
+.action-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:4px;font-size:12px;font-weight:600;border:1px solid #2a1f40;background:#1a1030;color:#8870a8;cursor:pointer;transition:border-color .15s,color .15s;letter-spacing:.5px;font-family:inherit}
+.action-btn:hover{border-color:#7c3aed;color:#c4b5fd}
 .loading{font-size:12px;color:#554070;padding:8px 0}
 .modal{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;display:none;align-items:center;justify-content:center}
 .modal.active{display:flex}
@@ -44,11 +43,11 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
 .modal-box h2{margin-bottom:16px}
 .form-group{margin-bottom:12px}
 .form-group label{display:block;font-size:11px;color:#8870a8;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
-.form-group input,.form-group textarea{width:100%;background:#1a1030;border:1px solid #2a1f40;border-radius:3px;padding:8px 10px;font-size:12px;color:#e0d8f0;outline:none;transition:border-color .15s;font-family:'Segoe UI',system-ui,sans-serif}
+.form-group input,.form-group textarea{width:100%;background:#1a1030;border:1px solid #2a1f40;border-radius:3px;padding:8px 10px;font-size:12px;color:#e0d8f0;outline:none;transition:border-color .15s;font-family:inherit}
 .form-group input:focus,.form-group textarea:focus{border-color:#7c3aed}
 .form-group textarea{min-height:80px;resize:vertical}
 .form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
-.form-actions button{padding:8px 16px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.5px;border:none;transition:opacity .15s}
+.form-actions button{padding:8px 16px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.5px;border:none;font-family:inherit;transition:opacity .15s}
 .form-actions button:hover{opacity:.85}
 .btn-primary{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff}
 .btn-cancel{background:#1a1030;color:#8870a8;border:1px solid #2a1f40!important}
@@ -57,9 +56,9 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
 .stars span.active{color:#f59e0b}
 .stars span:hover{color:#f59e0b}
 .token-input{display:flex;gap:8px;align-items:center;margin-bottom:12px;width:100%}
-.token-input input{flex:1;background:#1a1030;border:1px solid #2a1f40;border-radius:3px;padding:8px 10px;font-size:12px;color:#e0d8f0;outline:none;font-family:'Segoe UI',system-ui,sans-serif}
+.token-input input{flex:1;background:#1a1030;border:1px solid #2a1f40;border-radius:3px;padding:8px 10px;font-size:12px;color:#e0d8f0;outline:none;font-family:inherit}
 .token-input input:focus{border-color:#7c3aed}
-.token-input button{padding:8px 12px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;white-space:nowrap;transition:opacity .15s}
+.token-input button{padding:8px 12px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;white-space:nowrap;font-family:inherit;transition:opacity .15s}
 .token-input button:hover{opacity:.85}
 .status-msg{font-size:11px;color:#8870a8;margin-top:4px}
 .status-msg.error{color:#ef4444}
@@ -81,10 +80,7 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
 
   <p>Share your experience or suggest something new.</p>
 
-  <div class="actions">
-    <button class="action-btn review" onclick="openForm('review')">★ Write a Review</button>
-    <button class="action-btn suggest" onclick="openForm('suggestion')">Suggest a Feature</button>
-  </div>
+  <div class="actions" id="action-buttons"></div>
 
   <hr>
 
@@ -103,7 +99,7 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
 </div>
 
 <div class="modal" id="modal">
-  <div class="modal-bg" onclick="closeForm()"></div>
+  <div class="modal-bg" id="modal-bg"></div>
   <div class="modal-box">
     <h2 id="modal-title">Write a Review</h2>
     <div id="form-content"></div>
@@ -128,16 +124,18 @@ function openForm(type) {
   let content = document.getElementById('form-content');
 
   if (!token) {
-    content.innerHTML = `
-      <p style="font-size:12px;color:#9880b8;margin-bottom:12px">You need a GitHub token to post. Create one at <a href="https://github.com/settings/tokens/new?scopes=public_repo&description=Nexus" target="_blank" style="color:#7c3aed">GitHub Tokens</a> with <strong style="color:#c4b5fd">public_repo</strong> scope.</p>
-      <div class="token-input">
-        <input type="password" id="token-field" placeholder="ghp_..." autocomplete="off">
-        <button onclick="saveToken()">Save</button>
-      </div>
-      <div id="token-status" class="status-msg"></div>
-    `;
+    content.innerHTML =
+      '<p style="font-size:12px;color:#9880b8;margin-bottom:12px">You need a GitHub token to post. Create one at <a href="https://github.com/settings/tokens/new?scopes=public_repo&description=Nexus" target="_blank" style="color:#7c3aed">GitHub Tokens</a> with <strong style="color:#c4b5fd">public_repo</strong> scope.</p>' +
+      '<div class="token-input">' +
+      '<input type="password" id="token-field" placeholder="ghp_..." autocomplete="off">' +
+      '<button id="token-save-btn">Save</button></div>' +
+      '<div id="token-status" class="status-msg"></div>';
     document.getElementById('modal-title').textContent = 'GitHub Token';
     document.getElementById('modal').classList.add('active');
+    document.getElementById('token-save-btn').addEventListener('click', saveToken);
+    document.getElementById('token-field').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') saveToken();
+    });
     return;
   }
   showForm(type);
@@ -147,9 +145,10 @@ function saveToken() {
   let val = document.getElementById('token-field').value.trim();
   if (!val) return;
   setToken(val);
-  document.getElementById('token-status').textContent = 'Token saved.';
-  document.getElementById('token-status').className = 'status-msg success';
-  setTimeout(() => showForm(mode), 600);
+  let st = document.getElementById('token-status');
+  st.textContent = 'Token saved.';
+  st.className = 'status-msg success';
+  setTimeout(function() { showForm(mode); }, 600);
 }
 
 function showForm(type) {
@@ -157,51 +156,35 @@ function showForm(type) {
   let content = document.getElementById('form-content');
 
   if (type === 'review') {
-    content.innerHTML = `
-      <div class="form-group">
-        <label>Rating</label>
-        <div class="stars" id="star-picker">
-          <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Your Experience</label>
-        <textarea id="field-experience" placeholder="Tell others what you think..."></textarea>
-      </div>
-      <div class="form-group">
-        <label>System Specs (optional)</label>
-        <textarea id="field-specs" placeholder="e.g. Windows 11, RTX 4070, i7-13700K"></textarea>
-      </div>
-      <div class="form-actions">
-        <button class="btn-cancel" onclick="closeForm()">Cancel</button>
-        <button class="btn-primary" onclick="submitForm()">Submit Review</button>
-      </div>
-      <div id="submit-status" class="status-msg"></div>
-    `;
-    setTimeout(() => {
-      let stars = document.querySelectorAll('#star-picker span');
-      stars.forEach(s => s.addEventListener('click', function() {
-        stars.forEach(x => x.classList.remove('active'));
-        let v = parseInt(this.dataset.v);
-        for (let i = 0; i < v; i++) stars[i].classList.add('active');
-      }));
+    content.innerHTML =
+      '<div class="form-group"><label>Rating</label><div class="stars" id="star-picker">' +
+      '<span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span></div></div>' +
+      '<div class="form-group"><label>Your Experience</label><textarea id="field-experience" placeholder="Tell others what you think..."></textarea></div>' +
+      '<div class="form-group"><label>System Specs (optional)</label><textarea id="field-specs" placeholder="e.g. Windows 11, RTX 4070, i7-13700K"></textarea></div>' +
+      '<div class="form-actions"><button class="btn-cancel" id="cancel-btn">Cancel</button><button class="btn-primary" id="submit-btn">Submit Review</button></div>' +
+      '<div id="submit-status" class="status-msg"></div>';
+    setTimeout(function() {
+      var stars = document.querySelectorAll('#star-picker span');
+      for (var i = 0; i < stars.length; i++) {
+        stars[i].addEventListener('click', function() {
+          for (var j = 0; j < stars.length; j++) stars[j].classList.remove('active');
+          var v = parseInt(this.dataset.v);
+          for (var k = 0; k < v; k++) stars[k].classList.add('active');
+        });
+      }
+      document.getElementById('submit-btn').addEventListener('click', submitForm);
+      document.getElementById('cancel-btn').addEventListener('click', closeForm);
     }, 50);
   } else {
-    content.innerHTML = `
-      <div class="form-group">
-        <label>Your Idea</label>
-        <textarea id="field-idea" placeholder="What feature would you like to see?"></textarea>
-      </div>
-      <div class="form-group">
-        <label>Why This Helps</label>
-        <textarea id="field-why" placeholder="How would this improve Nexus?"></textarea>
-      </div>
-      <div class="form-actions">
-        <button class="btn-cancel" onclick="closeForm()">Cancel</button>
-        <button class="btn-primary" onclick="submitForm()">Submit Suggestion</button>
-      </div>
-      <div id="submit-status" class="status-msg"></div>
-    `;
+    content.innerHTML =
+      '<div class="form-group"><label>Your Idea</label><textarea id="field-idea" placeholder="What feature would you like to see?"></textarea></div>' +
+      '<div class="form-group"><label>Why This Helps</label><textarea id="field-why" placeholder="How would this improve Nexus?"></textarea></div>' +
+      '<div class="form-actions"><button class="btn-cancel" id="cancel-btn">Cancel</button><button class="btn-primary" id="submit-btn">Submit Suggestion</button></div>' +
+      '<div id="submit-status" class="status-msg"></div>';
+    setTimeout(function() {
+      document.getElementById('submit-btn').addEventListener('click', submitForm);
+      document.getElementById('cancel-btn').addEventListener('click', closeForm);
+    }, 50);
   }
 
   document.getElementById('modal').classList.add('active');
@@ -241,10 +224,10 @@ async function submitForm() {
       return;
     }
 
-    let starStr = '★★★★★'.slice(0, stars) + '☆'.repeat(5 - stars);
-    title = `Review: ${experience.slice(0, 60)}`;
-    body = `### Rating\n\n${starStr}\n\n### Your experience\n\n${experience}`;
-    if (specs) body += `\n\n### System specs (optional)\n\n${specs}`;
+    let starStr = '\u2605'.repeat(stars) + '\u2606'.repeat(5 - stars);
+    title = 'Review: ' + experience.slice(0, 60);
+    body = '### Rating\n\n' + starStr + '\n\n### Your experience\n\n' + experience;
+    if (specs) body += '\n\n### System specs (optional)\n\n' + specs;
   } else {
     let idea = document.getElementById('field-idea').value.trim();
     let why = document.getElementById('field-why').value.trim();
@@ -260,21 +243,21 @@ async function submitForm() {
       return;
     }
 
-    title = `Suggestion: ${idea.slice(0, 60)}`;
-    body = `### Your idea\n\n${idea}\n\n### Why this helps\n\n${why}`;
+    title = 'Suggestion: ' + idea.slice(0, 60);
+    body = '### Your idea\n\n' + idea + '\n\n### Why this helps\n\n' + why;
   }
 
   try {
     let res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'Authorization': 'Bearer ' + token,
         'Content-Type': 'application/json',
         'Accept': 'application/vnd.github.v3+json'
       },
       body: JSON.stringify({
-        title,
-        body,
+        title: title,
+        body: body,
         labels: mode === 'review' ? ['review'] : ['suggestion']
       })
     });
@@ -283,25 +266,25 @@ async function submitForm() {
       setToken(null);
       status.textContent = 'Token is invalid or expired. Please re-enter.';
       status.className = 'status-msg error';
-      setTimeout(() => { closeForm(); openForm(mode); }, 1500);
+      setTimeout(function() { closeForm(); openForm(mode); }, 1500);
       return;
     }
 
     if (!res.ok) {
       let err = await res.text();
-      status.textContent = `Error: ${err.slice(0, 100)}`;
+      status.textContent = 'Error: ' + err.slice(0, 100);
       status.className = 'status-msg error';
       return;
     }
 
     status.textContent = 'Submitted! Thank you.';
     status.className = 'status-msg success';
-    setTimeout(() => {
+    setTimeout(function() {
       closeForm();
       loadReviews();
     }, 1200);
   } catch (e) {
-    status.textContent = `Network error: ${e.message}`;
+    status.textContent = 'Network error: ' + e.message;
     status.className = 'status-msg error';
   }
 }
@@ -324,24 +307,23 @@ async function loadReviews() {
       let fields = parseReviewBody(issue.body || '');
       let date = new Date(issue.created_at).toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'});
       let extra = '';
-      if (fields.rating) extra += `<div style="font-size:16px;margin:2px 0 2px 0">${escapeHtml(fields.rating)}</div>`;
-      if (fields.experience) extra += `<div class="body">${escapeHtml(fields.experience)}</div>`;
-      card.innerHTML = `
-        <div class="title"><a href="${issue.html_url}" target="_blank">${escapeHtml(issue.title)}</a></div>
-        <div class="meta">by ${escapeHtml(issue.user.login)} · ${date} ${issue.state === 'closed' ? '· resolved' : ''}</div>
-        ${extra}
-      `;
+      if (fields.rating) extra += '<div style="font-size:16px;margin:2px 0 2px 0">' + escapeHtml(fields.rating) + '</div>';
+      if (fields.experience) extra += '<div class="body">' + escapeHtml(fields.experience) + '</div>';
+      card.innerHTML =
+        '<div class="title"><a href="' + issue.html_url + '" target="_blank">' + escapeHtml(issue.title) + '</a></div>' +
+        '<div class="meta">by ' + escapeHtml(issue.user.login) + ' \u00b7 ' + date + (issue.state === 'closed' ? ' \u00b7 resolved' : '') + '</div>' +
+        extra;
       container.appendChild(card);
     }
   } catch (e) {
-    document.getElementById('reviews-list').innerHTML = '<p style="font-size:12px;color:#554070;padding:8px 0">Could not load reviews. <a href="https://github.com/ValTheOneAndOnly/nexus-site/issues">View on GitHub →</a></p>';
+    document.getElementById('reviews-list').innerHTML = '<p style="font-size:12px;color:#554070;padding:8px 0">Could not load reviews. <a href="https://github.com/ValTheOneAndOnly/nexus-site/issues">View on GitHub \u2192</a></p>';
   }
 }
 
 function parseReviewBody(body) {
   let result = { rating: '', experience: '', specs: '', idea: '', reason: '' };
   if (!body) return result;
-  let lines = body.split('\n').map(l => l.trim()).filter(l => l);
+  let lines = body.split('\n').map(function(l) { return l.trim(); }).filter(function(l) { return l; });
   let current = '';
   for (let line of lines) {
     if (line.startsWith('### ')) {
@@ -349,11 +331,11 @@ function parseReviewBody(body) {
       continue;
     }
     if (line === '_No response_' || line === '---') continue;
-    if (current.includes('rating')) result.rating = line;
-    else if (current.includes('your experience')) result.experience = (result.experience + ' ' + line).trim();
-    else if (current.includes('system specs')) result.specs = (result.specs + ' ' + line).trim();
-    else if (current.includes('your idea')) result.idea = (result.idea + ' ' + line).trim();
-    else if (current.includes('why this helps')) result.reason = (result.reason + ' ' + line).trim();
+    if (current.indexOf('rating') !== -1) result.rating = line;
+    else if (current.indexOf('your experience') !== -1) result.experience = (result.experience + ' ' + line).trim();
+    else if (current.indexOf('system specs') !== -1) result.specs = (result.specs + ' ' + line).trim();
+    else if (current.indexOf('your idea') !== -1) result.idea = (result.idea + ' ' + line).trim();
+    else if (current.indexOf('why this helps') !== -1) result.reason = (result.reason + ' ' + line).trim();
   }
   return result;
 }
@@ -364,7 +346,24 @@ function escapeHtml(s) {
   return d.innerHTML;
 }
 
-loadReviews();
+document.addEventListener('DOMContentLoaded', function() {
+  var actions = document.getElementById('action-buttons');
+  var reviewBtn = document.createElement('button');
+  reviewBtn.className = 'action-btn';
+  reviewBtn.textContent = '\u2605 Write a Review';
+  reviewBtn.addEventListener('click', function() { openForm('review'); });
+  actions.appendChild(reviewBtn);
+
+  var suggestBtn = document.createElement('button');
+  suggestBtn.className = 'action-btn';
+  suggestBtn.textContent = 'Suggest a Feature';
+  suggestBtn.addEventListener('click', function() { openForm('suggestion'); });
+  actions.appendChild(suggestBtn);
+
+  document.getElementById('modal-bg').addEventListener('click', closeForm);
+
+  loadReviews();
+});
 </script>
 </body>
 </html>
