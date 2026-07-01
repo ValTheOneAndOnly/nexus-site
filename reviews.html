@@ -78,7 +78,7 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
     <h1>REVIEWS</h1>
   </div>
 
-  <p>Share your experience or suggest something new.</p>
+  <p>Share your experience. Suggestions and bug reports go to Discord.</p>
 
   <div class="actions" id="action-buttons"></div>
 
@@ -107,7 +107,7 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
 </div>
 
 <script>
-let mode = '';
+let mode = 'review';
 
 function getToken() {
   return localStorage.getItem('nexus_gh_token');
@@ -119,7 +119,6 @@ function setToken(t) {
 }
 
 function openForm(type) {
-  mode = type;
   let token = getToken();
   let content = document.getElementById('form-content');
 
@@ -171,45 +170,27 @@ function saveToken() {
 }
 
 function showForm(type) {
-  document.getElementById('modal-title').textContent = type === 'review' ? 'Write a Review' : 'Suggest a Feature';
+  document.getElementById('modal-title').textContent = 'Write a Review';
   let content = document.getElementById('form-content');
-
-  if (type === 'review') {
-    content.innerHTML =
-      '<div class="form-group"><label>Rating</label><div class="stars" id="star-picker">' +
-      '<span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span></div></div>' +
-      '<div class="form-group"><label>Your Experience</label><textarea id="field-experience" placeholder="Tell others what you think..."></textarea></div>' +
-      '<div class="form-group"><label>System Specs (optional)</label><textarea id="field-specs" placeholder="e.g. Windows 11, RTX 4070, i7-13700K"></textarea></div>' +
-      '<div class="form-actions"><button class="btn-cancel" id="cancel-btn">Cancel</button><button class="btn-primary" id="submit-btn">Submit Review</button></div>' +
-      '<div id="submit-status" class="status-msg"></div>';
-    setTimeout(function() {
-      var stars = document.querySelectorAll('#star-picker span');
-      for (var i = 0; i < stars.length; i++) {
-        stars[i].addEventListener('click', function() {
-          for (var j = 0; j < stars.length; j++) stars[j].classList.remove('active');
-          var v = parseInt(this.dataset.v);
-          for (var k = 0; k < v; k++) stars[k].classList.add('active');
-        });
-      }
-      document.getElementById('submit-btn').addEventListener('click', submitForm);
-      document.getElementById('cancel-btn').addEventListener('click', closeForm);
-    }, 50);
-  } else {
-    content.innerHTML =
-      '<div style="text-align:center;padding:20px 0">' +
-      '<p style="font-size:13px;color:#9880b8;margin-bottom:16px">Have an idea or found an issue? DM me on Discord:</p>' +
-      '<a href="https://discord.com/users/1436458270759063603" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#1a1030;border:1px solid #2a1f40;border-radius:6px;padding:12px 24px;text-decoration:none;transition:border-color .15s" onmouseover="this.style.borderColor=\'#7c3aed\'" onmouseout="this.style.borderColor=\'#2a1f40\'">' +
-      '<span style="font-size:18px">💬</span>' +
-      '<span style="font-size:15px;font-weight:700;color:#c4b5fd">ValTheOneAndOnly</span>' +
-      '</a>' +
-      '<p style="font-size:11px;color:#554070;margin-top:12px">Bug reports, feature requests, anything.</p>' +
-      '</div>' +
-      '<div class="form-actions"><button class="btn-cancel" id="cancel-btn">Close</button></div>';
-    setTimeout(function() {
-      document.getElementById('cancel-btn').addEventListener('click', closeForm);
-    }, 50);
-  }
-
+  content.innerHTML =
+    '<div class="form-group"><label>Rating</label><div class="stars" id="star-picker">' +
+    '<span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span></div></div>' +
+    '<div class="form-group"><label>Your Experience</label><textarea id="field-experience" placeholder="Tell others what you think..."></textarea></div>' +
+    '<div class="form-group"><label>System Specs (optional)</label><textarea id="field-specs" placeholder="e.g. Windows 11, RTX 4070, i7-13700K"></textarea></div>' +
+    '<div class="form-actions"><button class="btn-cancel" id="cancel-btn">Cancel</button><button class="btn-primary" id="submit-btn">Submit Review</button></div>' +
+    '<div id="submit-status" class="status-msg"></div>';
+  setTimeout(function() {
+    var stars = document.querySelectorAll('#star-picker span');
+    for (var i = 0; i < stars.length; i++) {
+      stars[i].addEventListener('click', function() {
+        for (var j = 0; j < stars.length; j++) stars[j].classList.remove('active');
+        var v = parseInt(this.dataset.v);
+        for (var k = 0; k < v; k++) stars[k].classList.add('active');
+      });
+    }
+    document.getElementById('submit-btn').addEventListener('click', submitForm);
+    document.getElementById('cancel-btn').addEventListener('click', closeForm);
+  }, 50);
   document.getElementById('modal').classList.add('active');
 }
 
@@ -231,44 +212,25 @@ async function submitForm() {
 
   let title, body;
 
-  if (mode === 'review') {
-    let stars = document.querySelectorAll('#star-picker span.active').length;
-    let experience = document.getElementById('field-experience').value.trim();
-    let specs = document.getElementById('field-specs').value.trim();
+  let stars = document.querySelectorAll('#star-picker span.active').length;
+  let experience = document.getElementById('field-experience').value.trim();
+  let specs = document.getElementById('field-specs').value.trim();
 
-    if (!stars) {
-      status.textContent = 'Please select a rating.';
-      status.className = 'status-msg error';
-      return;
-    }
-    if (!experience) {
-      status.textContent = 'Please describe your experience.';
-      status.className = 'status-msg error';
-      return;
-    }
-
-    let starStr = '\u2605'.repeat(stars) + '\u2606'.repeat(5 - stars);
-    title = 'Review: ' + experience.slice(0, 60);
-    body = '### Rating\n\n' + starStr + '\n\n### Your experience\n\n' + experience;
-    if (specs) body += '\n\n### System specs (optional)\n\n' + specs;
-  } else {
-    let idea = document.getElementById('field-idea').value.trim();
-    let why = document.getElementById('field-why').value.trim();
-
-    if (!idea) {
-      status.textContent = 'Please describe your idea.';
-      status.className = 'status-msg error';
-      return;
-    }
-    if (!why) {
-      status.textContent = 'Please explain why this helps.';
-      status.className = 'status-msg error';
-      return;
-    }
-
-    title = 'Suggestion: ' + idea.slice(0, 60);
-    body = '### Your idea\n\n' + idea + '\n\n### Why this helps\n\n' + why;
+  if (!stars) {
+    status.textContent = 'Please select a rating.';
+    status.className = 'status-msg error';
+    return;
   }
+  if (!experience) {
+    status.textContent = 'Please describe your experience.';
+    status.className = 'status-msg error';
+    return;
+  }
+
+  let starStr = '\u2605'.repeat(stars) + '\u2606'.repeat(5 - stars);
+  title = 'Review: ' + experience.slice(0, 60);
+  body = '### Rating\n\n' + starStr + '\n\n### Your experience\n\n' + experience;
+  if (specs) body += '\n\n### System specs (optional)\n\n' + specs;
 
   try {
     let res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues', {
@@ -281,7 +243,7 @@ async function submitForm() {
       body: JSON.stringify({
         title: title,
         body: body,
-        labels: mode === 'review' ? ['review'] : ['suggestion']
+        labels: ['review']
       })
     });
 
@@ -344,7 +306,7 @@ async function loadReviews() {
 }
 
 function parseReviewBody(body) {
-  let result = { rating: '', experience: '', specs: '', idea: '', reason: '' };
+  let result = { rating: '', experience: '', specs: '' };
   if (!body) return result;
   let lines = body.split('\n').map(function(l) { return l.trim(); }).filter(function(l) { return l; });
   let current = '';
@@ -357,8 +319,6 @@ function parseReviewBody(body) {
     if (current.indexOf('rating') !== -1) result.rating = line;
     else if (current.indexOf('your experience') !== -1) result.experience = (result.experience + ' ' + line).trim();
     else if (current.indexOf('system specs') !== -1) result.specs = (result.specs + ' ' + line).trim();
-    else if (current.indexOf('your idea') !== -1) result.idea = (result.idea + ' ' + line).trim();
-    else if (current.indexOf('why this helps') !== -1) result.reason = (result.reason + ' ' + line).trim();
   }
   return result;
 }
@@ -380,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var suggestBtn = document.createElement('button');
   suggestBtn.className = 'action-btn';
   suggestBtn.textContent = 'Suggest or Report';
-  suggestBtn.addEventListener('click', function() { openForm('suggestion'); });
+  suggestBtn.addEventListener('click', function() { window.open('https://discord.com/users/1436458270759063603', '_blank'); });
   actions.appendChild(suggestBtn);
 
   document.getElementById('modal-bg').addEventListener('click', closeForm);
