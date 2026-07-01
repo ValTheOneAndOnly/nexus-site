@@ -196,12 +196,16 @@ function showForm(type) {
     }, 50);
   } else {
     content.innerHTML =
-      '<div class="form-group"><label>Your Idea</label><textarea id="field-idea" placeholder="What feature would you like to see?"></textarea></div>' +
-      '<div class="form-group"><label>Why This Helps</label><textarea id="field-why" placeholder="How would this improve Nexus?"></textarea></div>' +
-      '<div class="form-actions"><button class="btn-cancel" id="cancel-btn">Cancel</button><button class="btn-primary" id="submit-btn">Submit Suggestion</button></div>' +
-      '<div id="submit-status" class="status-msg"></div>';
+      '<div style="text-align:center;padding:20px 0">' +
+      '<p style="font-size:13px;color:#9880b8;margin-bottom:16px">Have an idea or found an issue? DM me on Discord:</p>' +
+      '<a href="https://discord.com/users/1436458270759063603" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#1a1030;border:1px solid #2a1f40;border-radius:6px;padding:12px 24px;text-decoration:none;transition:border-color .15s" onmouseover="this.style.borderColor=\'#7c3aed\'" onmouseout="this.style.borderColor=\'#2a1f40\'">' +
+      '<span style="font-size:18px">💬</span>' +
+      '<span style="font-size:15px;font-weight:700;color:#c4b5fd">ValTheOneAndOnly</span>' +
+      '</a>' +
+      '<p style="font-size:11px;color:#554070;margin-top:12px">Bug reports, feature requests, anything.</p>' +
+      '</div>' +
+      '<div class="form-actions"><button class="btn-cancel" id="cancel-btn">Close</button></div>';
     setTimeout(function() {
-      document.getElementById('submit-btn').addEventListener('click', submitForm);
       document.getElementById('cancel-btn').addEventListener('click', closeForm);
     }, 50);
   }
@@ -375,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   var suggestBtn = document.createElement('button');
   suggestBtn.className = 'action-btn';
-  suggestBtn.textContent = 'Suggest a Feature';
+  suggestBtn.textContent = 'Suggest or Report';
   suggestBtn.addEventListener('click', function() { openForm('suggestion'); });
   actions.appendChild(suggestBtn);
 
