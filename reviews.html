@@ -82,18 +82,42 @@ async function loadReviews() {
     for (let issue of issues) {
       let card = document.createElement('div');
       card.className = 'review-card';
-      let body = (issue.body || '').slice(0, 300);
+      let fields = parseReviewBody(issue.body || '');
       let date = new Date(issue.created_at).toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'});
+      let extra = '';
+      if (fields.rating) extra += `<div style="font-size:15px;margin-bottom:4px">${escapeHtml(fields.rating)}</div>`;
+      if (fields.experience) extra += `<div class="body">${escapeHtml(fields.experience)}</div>`;
+      if (fields.specs) extra += `<div class="meta" style="margin-top:4px">${escapeHtml(fields.specs)}</div>`;
       card.innerHTML = `
         <div class="title"><a href="${issue.html_url}" target="_blank">${escapeHtml(issue.title)}</a></div>
         <div class="meta">by ${escapeHtml(issue.user.login)} · ${date} ${issue.state === 'closed' ? '· resolved' : ''}</div>
-        ${body ? `<div class="body">${escapeHtml(body)}</div>` : ''}
+        ${extra}
       `;
       container.appendChild(card);
     }
   } catch (e) {
     document.getElementById('reviews-list').innerHTML = '<p style="font-size:12px;color:#554070">Could not load reviews. <a href="https://github.com/ValTheOneAndOnly/nexus-site/issues" style="color:#7c3aed;text-decoration:none">View on GitHub →</a></p>';
   }
+}
+function parseReviewBody(body) {
+  // Parse YAML-template markdown body into clean fields
+  let result = { rating: '', experience: '', specs: '', idea: '', reason: '' };
+  if (!body) return result;
+  let lines = body.split('\n').map(l => l.trim()).filter(l => l);
+  let current = '';
+  for (let line of lines) {
+    if (line.startsWith('### ')) {
+      current = line.replace('### ', '').replace(' (optional)', '').toLowerCase();
+      continue;
+    }
+    if (line === '_No response_' || line === '---') continue;
+    if (current.includes('rating')) result.rating = line;
+    else if (current.includes('your experience')) result.experience = (result.experience + ' ' + line).trim();
+    else if (current.includes('system specs')) result.specs = (result.specs + ' ' + line).trim();
+    else if (current.includes('your idea')) result.idea = (result.idea + ' ' + line).trim();
+    else if (current.includes('why this helps')) result.reason = (result.reason + ' ' + line).trim();
+  }
+  return result;
 }
 function escapeHtml(s) {
   let d = document.createElement('div');
