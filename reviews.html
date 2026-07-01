@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
-<title>Nexus — Reviews</title>
+<title>Nexus — Reviews & Suggestions</title>
 <link rel="icon" href="icon.png">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -78,7 +78,7 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
     <h1>REVIEWS</h1>
   </div>
 
-  <p>Share your experience. Suggestions and bug reports go to Discord.</p>
+  <p>Share your experience or suggest something new.</p>
 
   <div class="actions" id="action-buttons"></div>
 
@@ -119,6 +119,7 @@ function setToken(t) {
 }
 
 function openForm(type) {
+  mode = type;
   let token = getToken();
   let content = document.getElementById('form-content');
 
@@ -170,15 +171,26 @@ function saveToken() {
 }
 
 function showForm(type) {
-  document.getElementById('modal-title').textContent = 'Write a Review';
   let content = document.getElementById('form-content');
-  content.innerHTML =
-    '<div class="form-group"><label>Rating</label><div class="stars" id="star-picker">' +
-    '<span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span></div></div>' +
-    '<div class="form-group"><label>Your Experience</label><textarea id="field-experience" placeholder="Tell others what you think..."></textarea></div>' +
-    '<div class="form-group"><label>System Specs (optional)</label><textarea id="field-specs" placeholder="e.g. Windows 11, RTX 4070, i7-13700K"></textarea></div>' +
-    '<div class="form-actions"><button class="btn-cancel" id="cancel-btn">Cancel</button><button class="btn-primary" id="submit-btn">Submit Review</button></div>' +
-    '<div id="submit-status" class="status-msg"></div>';
+
+  if (type === 'review') {
+    document.getElementById('modal-title').textContent = 'Write a Review';
+    content.innerHTML =
+      '<div class="form-group"><label>Rating</label><div class="stars" id="star-picker">' +
+      '<span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span></div></div>' +
+      '<div class="form-group"><label>Your Experience</label><textarea id="field-experience" placeholder="Tell others what you think..."></textarea></div>' +
+      '<div class="form-group"><label>System Specs (optional)</label><textarea id="field-specs" placeholder="e.g. Windows 11, RTX 4070, i7-13700K"></textarea></div>' +
+      '<div class="form-actions"><button class="btn-cancel" id="cancel-btn">Cancel</button><button class="btn-primary" id="submit-btn">Submit Review</button></div>' +
+      '<div id="submit-status" class="status-msg"></div>';
+  } else {
+    document.getElementById('modal-title').textContent = 'Suggest a Feature';
+    content.innerHTML =
+      '<div class="form-group"><label>Your Idea</label><textarea id="field-idea" placeholder="What would you like to see?"></textarea></div>' +
+      '<div class="form-group"><label>Why This Helps</label><textarea id="field-why" placeholder="How does this improve Nexus?"></textarea></div>' +
+      '<div class="form-actions"><button class="btn-cancel" id="cancel-btn">Cancel</button><button class="btn-primary" id="submit-btn">Submit Suggestion</button></div>' +
+      '<div id="submit-status" class="status-msg"></div>';
+  }
+
   setTimeout(function() {
     var stars = document.querySelectorAll('#star-picker span');
     for (var i = 0; i < stars.length; i++) {
@@ -212,25 +224,44 @@ async function submitForm() {
 
   let title, body;
 
-  let stars = document.querySelectorAll('#star-picker span.active').length;
-  let experience = document.getElementById('field-experience').value.trim();
-  let specs = document.getElementById('field-specs').value.trim();
+  if (mode === 'review') {
+    let stars = document.querySelectorAll('#star-picker span.active').length;
+    let experience = document.getElementById('field-experience').value.trim();
+    let specs = document.getElementById('field-specs').value.trim();
 
-  if (!stars) {
-    status.textContent = 'Please select a rating.';
-    status.className = 'status-msg error';
-    return;
-  }
-  if (!experience) {
-    status.textContent = 'Please describe your experience.';
-    status.className = 'status-msg error';
-    return;
-  }
+    if (!stars) {
+      status.textContent = 'Please select a rating.';
+      status.className = 'status-msg error';
+      return;
+    }
+    if (!experience) {
+      status.textContent = 'Please describe your experience.';
+      status.className = 'status-msg error';
+      return;
+    }
 
-  let starStr = '\u2605'.repeat(stars) + '\u2606'.repeat(5 - stars);
-  title = 'Review: ' + experience.slice(0, 60);
-  body = '### Rating\n\n' + starStr + '\n\n### Your experience\n\n' + experience;
-  if (specs) body += '\n\n### System specs (optional)\n\n' + specs;
+    let starStr = '\u2605'.repeat(stars) + '\u2606'.repeat(5 - stars);
+    title = 'Review: ' + experience.slice(0, 60);
+    body = '### Rating\n\n' + starStr + '\n\n### Your experience\n\n' + experience;
+    if (specs) body += '\n\n### System specs (optional)\n\n' + specs;
+  } else {
+    let idea = document.getElementById('field-idea').value.trim();
+    let why = document.getElementById('field-why').value.trim();
+
+    if (!idea) {
+      status.textContent = 'Please describe your idea.';
+      status.className = 'status-msg error';
+      return;
+    }
+    if (!why) {
+      status.textContent = 'Please explain why this helps.';
+      status.className = 'status-msg error';
+      return;
+    }
+
+    title = 'Suggestion: ' + idea.slice(0, 60);
+    body = '### Your idea\n\n' + idea + '\n\n### Why this helps\n\n' + why;
+  }
 
   try {
     let res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues', {
@@ -243,7 +274,7 @@ async function submitForm() {
       body: JSON.stringify({
         title: title,
         body: body,
-        labels: ['review']
+        labels: mode === 'review' ? ['review'] : ['suggestion']
       })
     });
 
@@ -306,7 +337,7 @@ async function loadReviews() {
 }
 
 function parseReviewBody(body) {
-  let result = { rating: '', experience: '', specs: '' };
+  let result = { rating: '', experience: '', specs: '', idea: '', reason: '' };
   if (!body) return result;
   let lines = body.split('\n').map(function(l) { return l.trim(); }).filter(function(l) { return l; });
   let current = '';
@@ -319,6 +350,8 @@ function parseReviewBody(body) {
     if (current.indexOf('rating') !== -1) result.rating = line;
     else if (current.indexOf('your experience') !== -1) result.experience = (result.experience + ' ' + line).trim();
     else if (current.indexOf('system specs') !== -1) result.specs = (result.specs + ' ' + line).trim();
+    else if (current.indexOf('your idea') !== -1) result.idea = (result.idea + ' ' + line).trim();
+    else if (current.indexOf('why this helps') !== -1) result.reason = (result.reason + ' ' + line).trim();
   }
   return result;
 }
@@ -340,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var suggestBtn = document.createElement('button');
   suggestBtn.className = 'action-btn';
   suggestBtn.textContent = 'Suggest or Report';
-  suggestBtn.addEventListener('click', function() { window.open('https://discord.com/users/1436458270759063603', '_blank'); });
+  suggestBtn.addEventListener('click', function() { openForm('suggestion'); });
   actions.appendChild(suggestBtn);
 
   document.getElementById('modal-bg').addEventListener('click', closeForm);
