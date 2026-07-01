@@ -13,25 +13,26 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#07050d;color:#e0d8f
 .topbar{position:fixed;top:16px;right:24px;z-index:3;display:flex;gap:8px}
 .topbtn{display:inline-flex;align-items:center;gap:6px;background:#1a1030;color:#8870a8;border:1px solid #2a1f40;border-radius:4px;padding:8px 14px;font-size:12px;font-weight:600;text-decoration:none;cursor:pointer;transition:border-color .15s,color .15s;letter-spacing:.5px}
 .topbtn:hover{border-color:#7c3aed;color:#c4b5fd}
-.content{position:relative;z-index:2;width:100%;max-width:620px;padding:60px 24px;display:flex;flex-direction:column;align-items:center;gap:28px}
-.logo{display:flex;flex-direction:column;align-items:center;gap:6px}
-.logo img{width:48px;height:48px}
-.logo h1{font-size:20px;font-weight:800;letter-spacing:5px;color:#c4b5fd}
-h2{font-size:14px;font-weight:700;color:#c4b5fd;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;text-align:center}
+.content{position:relative;z-index:2;width:100%;max-width:620px;padding:60px 24px;display:flex;flex-direction:column;align-items:center;gap:32px}
+.logo{display:flex;flex-direction:column;align-items:center;gap:8px}
+.logo img{width:64px;height:64px}
+.logo h1{font-size:24px;font-weight:800;letter-spacing:6px;color:#c4b5fd}
+h2{font-size:13px;font-weight:700;color:#8870a8;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;text-align:center}
 p{font-size:13px;color:#9880b8;line-height:1.7;text-align:center}
-hr{width:40px;height:1px;border:none;background:#2a1f40}
+hr{border:none;height:1px;width:40px;background:#2a1f40}
 .actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
-.action-btn{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:6px;font-size:13px;font-weight:700;text-decoration:none;border:none;cursor:pointer;transition:opacity .15s;letter-spacing:.5px}
-.action-btn:hover{opacity:.8}
-.action-btn.review{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff}
+.action-btn{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:6px;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer;transition:opacity .15s;letter-spacing:.5px}
+.action-btn:hover{opacity:.85}
+.action-btn.review{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border:none}
 .action-btn.suggest{background:#1a1030;color:#c4b5fd;border:1px solid #2a1f40}
 .reviews-list{width:100%;display:flex;flex-direction:column;gap:8px}
-.review-card{background:rgba(26,16,48,.5);border:1px solid #2a1f40;border-radius:6px;padding:14px 16px;text-align:left}
-.review-card .title{font-size:13px;font-weight:600;color:#c4b5fd;margin-bottom:4px}
+.review-card{background:rgba(21,16,9,.08);border:1px solid #2a1f40;border-radius:10px;padding:16px;text-align:left;transition:border-color .15s}
+.review-card:hover{border-color:#3a2a60}
+.review-card .title{font-size:13px;font-weight:600;margin-bottom:4px}
 .review-card .title a{color:#c4b5fd;text-decoration:none}
 .review-card .title a:hover{color:#b366ff}
 .review-card .meta{font-size:11px;color:#554070}
-.review-card .body{font-size:12px;color:#9880b8;margin-top:6px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.review-card .body{font-size:12px;color:#9880b8;margin-top:6px;line-height:1.6}
 .loading{font-size:12px;color:#554070}
 </style>
 </head>
@@ -70,24 +71,24 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
 <script>
 async function loadReviews() {
   try {
-    let res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues?state=all&per_page=20&sort=created&direction=desc');
+    let res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues?labels=review&per_page=20&sort=created&direction=desc');
     if (!res.ok) throw new Error('fetch failed');
     let issues = await res.json();
     let container = document.getElementById('reviews-list');
     container.innerHTML = '';
     if (issues.length === 0) {
-      container.innerHTML = '<p style="font-size:12px;color:#554070">No reviews yet. Be the first!</p>';
+      container.innerHTML = '<p style="font-size:12px;color:#554070;padding:16px">No reviews yet. Be the first!</p>';
       return;
     }
     for (let issue of issues) {
+      if (issue.pull_request) continue;
       let card = document.createElement('div');
       card.className = 'review-card';
       let fields = parseReviewBody(issue.body || '');
       let date = new Date(issue.created_at).toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'});
       let extra = '';
-      if (fields.rating) extra += `<div style="font-size:15px;margin-bottom:4px">${escapeHtml(fields.rating)}</div>`;
+      if (fields.rating) extra += `<div style="font-size:16px;margin:4px 0 4px 0">${escapeHtml(fields.rating)}</div>`;
       if (fields.experience) extra += `<div class="body">${escapeHtml(fields.experience)}</div>`;
-      if (fields.specs) extra += `<div class="meta" style="margin-top:4px">${escapeHtml(fields.specs)}</div>`;
       card.innerHTML = `
         <div class="title"><a href="${issue.html_url}" target="_blank">${escapeHtml(issue.title)}</a></div>
         <div class="meta">by ${escapeHtml(issue.user.login)} · ${date} ${issue.state === 'closed' ? '· resolved' : ''}</div>
@@ -96,11 +97,10 @@ async function loadReviews() {
       container.appendChild(card);
     }
   } catch (e) {
-    document.getElementById('reviews-list').innerHTML = '<p style="font-size:12px;color:#554070">Could not load reviews. <a href="https://github.com/ValTheOneAndOnly/nexus-site/issues" style="color:#7c3aed;text-decoration:none">View on GitHub →</a></p>';
+    document.getElementById('reviews-list').innerHTML = '<p style="font-size:12px;color:#554070;padding:16px">Could not load reviews. <a href="https://github.com/ValTheOneAndOnly/nexus-site/issues" style="color:#7c3aed;text-decoration:none">View on GitHub →</a></p>';
   }
 }
 function parseReviewBody(body) {
-  // Parse YAML-template markdown body into clean fields
   let result = { rating: '', experience: '', specs: '', idea: '', reason: '' };
   if (!body) return result;
   let lines = body.split('\n').map(l => l.trim()).filter(l => l);
