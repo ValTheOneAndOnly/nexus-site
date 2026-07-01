@@ -37,6 +37,33 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
 .action-btn.suggest{background:#1a1030;color:#8870a8;border:1px solid #2a1f40}
 .action-btn.suggest:hover{border-color:#7c3aed;color:#c4b5fd}
 .loading{font-size:12px;color:#554070;padding:8px 0}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;display:none;align-items:center;justify-content:center}
+.modal.active{display:flex}
+.modal-bg{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(7,5,13,.8)}
+.modal-box{position:relative;background:#0f0a1e;border:1px solid #2a1f40;border-radius:8px;padding:24px;width:90%;max-width:460px;max-height:90vh;overflow-y:auto}
+.modal-box h2{margin-bottom:16px}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:11px;color:#8870a8;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.form-group input,.form-group textarea{width:100%;background:#1a1030;border:1px solid #2a1f40;border-radius:3px;padding:8px 10px;font-size:12px;color:#e0d8f0;outline:none;transition:border-color .15s;font-family:'Segoe UI',system-ui,sans-serif}
+.form-group input:focus,.form-group textarea:focus{border-color:#7c3aed}
+.form-group textarea{min-height:80px;resize:vertical}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.form-actions button{padding:8px 16px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.5px;border:none;transition:opacity .15s}
+.form-actions button:hover{opacity:.85}
+.btn-primary{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff}
+.btn-cancel{background:#1a1030;color:#8870a8;border:1px solid #2a1f40!important}
+.stars{display:flex;gap:4px;cursor:pointer}
+.stars span{font-size:22px;color:#2a1f40;transition:color .1s}
+.stars span.active{color:#f59e0b}
+.stars span:hover{color:#f59e0b}
+.token-input{display:flex;gap:8px;align-items:center;margin-bottom:12px;width:100%}
+.token-input input{flex:1;background:#1a1030;border:1px solid #2a1f40;border-radius:3px;padding:8px 10px;font-size:12px;color:#e0d8f0;outline:none;font-family:'Segoe UI',system-ui,sans-serif}
+.token-input input:focus{border-color:#7c3aed}
+.token-input button{padding:8px 12px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;white-space:nowrap;transition:opacity .15s}
+.token-input button:hover{opacity:.85}
+.status-msg{font-size:11px;color:#8870a8;margin-top:4px}
+.status-msg.error{color:#ef4444}
+.status-msg.success{color:#22c55e}
 </style>
 </head>
 <body>
@@ -52,11 +79,11 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
     <h1>REVIEWS</h1>
   </div>
 
-  <p>Share your experience or suggest something new. All feedback goes to GitHub Issues.</p>
+  <p>Share your experience or suggest something new.</p>
 
   <div class="actions">
-    <a href="https://github.com/ValTheOneAndOnly/nexus-site/issues/new?template=review.yml&title=Review:" class="action-btn review">★ Write a Review</a>
-    <a href="https://github.com/ValTheOneAndOnly/nexus-site/issues/new?template=suggestion.yml&title=Suggestion:" class="action-btn suggest">Suggest a Feature</a>
+    <button class="action-btn review" onclick="openForm('review')">★ Write a Review</button>
+    <button class="action-btn suggest" onclick="openForm('suggestion')">Suggest a Feature</button>
   </div>
 
   <hr>
@@ -75,7 +102,210 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
   <p style="font-size:11px;color:#554070">ValTheOneAndOnly &middot; 2026</p>
 </div>
 
+<div class="modal" id="modal">
+  <div class="modal-bg" onclick="closeForm()"></div>
+  <div class="modal-box">
+    <h2 id="modal-title">Write a Review</h2>
+    <div id="form-content"></div>
+  </div>
+</div>
+
 <script>
+let mode = '';
+
+function getToken() {
+  return localStorage.getItem('nexus_gh_token');
+}
+
+function setToken(t) {
+  if (t) localStorage.setItem('nexus_gh_token', t);
+  else localStorage.removeItem('nexus_gh_token');
+}
+
+function openForm(type) {
+  mode = type;
+  let token = getToken();
+  let content = document.getElementById('form-content');
+
+  if (!token) {
+    content.innerHTML = `
+      <p style="font-size:12px;color:#9880b8;margin-bottom:12px">You need a GitHub token to post. Create one at <a href="https://github.com/settings/tokens/new?scopes=public_repo&description=Nexus" target="_blank" style="color:#7c3aed">GitHub Tokens</a> with <strong style="color:#c4b5fd">public_repo</strong> scope.</p>
+      <div class="token-input">
+        <input type="password" id="token-field" placeholder="ghp_..." autocomplete="off">
+        <button onclick="saveToken()">Save</button>
+      </div>
+      <div id="token-status" class="status-msg"></div>
+    `;
+    document.getElementById('modal-title').textContent = 'GitHub Token';
+    document.getElementById('modal').classList.add('active');
+    return;
+  }
+  showForm(type);
+}
+
+function saveToken() {
+  let val = document.getElementById('token-field').value.trim();
+  if (!val) return;
+  setToken(val);
+  document.getElementById('token-status').textContent = 'Token saved.';
+  document.getElementById('token-status').className = 'status-msg success';
+  setTimeout(() => showForm(mode), 600);
+}
+
+function showForm(type) {
+  document.getElementById('modal-title').textContent = type === 'review' ? 'Write a Review' : 'Suggest a Feature';
+  let content = document.getElementById('form-content');
+
+  if (type === 'review') {
+    content.innerHTML = `
+      <div class="form-group">
+        <label>Rating</label>
+        <div class="stars" id="star-picker">
+          <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Your Experience</label>
+        <textarea id="field-experience" placeholder="Tell others what you think..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>System Specs (optional)</label>
+        <textarea id="field-specs" placeholder="e.g. Windows 11, RTX 4070, i7-13700K"></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="closeForm()">Cancel</button>
+        <button class="btn-primary" onclick="submitForm()">Submit Review</button>
+      </div>
+      <div id="submit-status" class="status-msg"></div>
+    `;
+    setTimeout(() => {
+      let stars = document.querySelectorAll('#star-picker span');
+      stars.forEach(s => s.addEventListener('click', function() {
+        stars.forEach(x => x.classList.remove('active'));
+        let v = parseInt(this.dataset.v);
+        for (let i = 0; i < v; i++) stars[i].classList.add('active');
+      }));
+    }, 50);
+  } else {
+    content.innerHTML = `
+      <div class="form-group">
+        <label>Your Idea</label>
+        <textarea id="field-idea" placeholder="What feature would you like to see?"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Why This Helps</label>
+        <textarea id="field-why" placeholder="How would this improve Nexus?"></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="closeForm()">Cancel</button>
+        <button class="btn-primary" onclick="submitForm()">Submit Suggestion</button>
+      </div>
+      <div id="submit-status" class="status-msg"></div>
+    `;
+  }
+
+  document.getElementById('modal').classList.add('active');
+}
+
+function closeForm() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+async function submitForm() {
+  let status = document.getElementById('submit-status');
+  status.className = 'status-msg';
+  status.textContent = 'Submitting...';
+
+  let token = getToken();
+  if (!token) {
+    status.textContent = 'Token missing. Please re-open the form.';
+    status.className = 'status-msg error';
+    return;
+  }
+
+  let title, body;
+
+  if (mode === 'review') {
+    let stars = document.querySelectorAll('#star-picker span.active').length;
+    let experience = document.getElementById('field-experience').value.trim();
+    let specs = document.getElementById('field-specs').value.trim();
+
+    if (!stars) {
+      status.textContent = 'Please select a rating.';
+      status.className = 'status-msg error';
+      return;
+    }
+    if (!experience) {
+      status.textContent = 'Please describe your experience.';
+      status.className = 'status-msg error';
+      return;
+    }
+
+    let starStr = '★★★★★'.slice(0, stars) + '☆'.repeat(5 - stars);
+    title = `Review: ${experience.slice(0, 60)}`;
+    body = `### Rating\n\n${starStr}\n\n### Your experience\n\n${experience}`;
+    if (specs) body += `\n\n### System specs (optional)\n\n${specs}`;
+  } else {
+    let idea = document.getElementById('field-idea').value.trim();
+    let why = document.getElementById('field-why').value.trim();
+
+    if (!idea) {
+      status.textContent = 'Please describe your idea.';
+      status.className = 'status-msg error';
+      return;
+    }
+    if (!why) {
+      status.textContent = 'Please explain why this helps.';
+      status.className = 'status-msg error';
+      return;
+    }
+
+    title = `Suggestion: ${idea.slice(0, 60)}`;
+    body = `### Your idea\n\n${idea}\n\n### Why this helps\n\n${why}`;
+  }
+
+  try {
+    let res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.github.v3+json'
+      },
+      body: JSON.stringify({
+        title,
+        body,
+        labels: mode === 'review' ? ['review'] : ['suggestion']
+      })
+    });
+
+    if (res.status === 401) {
+      setToken(null);
+      status.textContent = 'Token is invalid or expired. Please re-enter.';
+      status.className = 'status-msg error';
+      setTimeout(() => { closeForm(); openForm(mode); }, 1500);
+      return;
+    }
+
+    if (!res.ok) {
+      let err = await res.text();
+      status.textContent = `Error: ${err.slice(0, 100)}`;
+      status.className = 'status-msg error';
+      return;
+    }
+
+    status.textContent = 'Submitted! Thank you.';
+    status.className = 'status-msg success';
+    setTimeout(() => {
+      closeForm();
+      loadReviews();
+    }, 1200);
+  } catch (e) {
+    status.textContent = `Network error: ${e.message}`;
+    status.className = 'status-msg error';
+  }
+}
+
 async function loadReviews() {
   try {
     let res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues?labels=review&per_page=20&sort=created&direction=desc');
@@ -107,6 +337,7 @@ async function loadReviews() {
     document.getElementById('reviews-list').innerHTML = '<p style="font-size:12px;color:#554070;padding:8px 0">Could not load reviews. <a href="https://github.com/ValTheOneAndOnly/nexus-site/issues">View on GitHub →</a></p>';
   }
 }
+
 function parseReviewBody(body) {
   let result = { rating: '', experience: '', specs: '', idea: '', reason: '' };
   if (!body) return result;
@@ -126,11 +357,13 @@ function parseReviewBody(body) {
   }
   return result;
 }
+
 function escapeHtml(s) {
   let d = document.createElement('div');
   d.textContent = s;
   return d.innerHTML;
 }
+
 loadReviews();
 </script>
 </body>
