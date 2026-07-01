@@ -125,9 +125,17 @@ function openForm(type) {
 
   if (!token) {
     content.innerHTML =
-      '<p style="font-size:12px;color:#9880b8;margin-bottom:12px">You need a GitHub token to post. Create one at <a href="https://github.com/settings/tokens/new?scopes=public_repo&description=Nexus" target="_blank" style="color:#7c3aed">GitHub Tokens</a> with <strong style="color:#c4b5fd">public_repo</strong> scope.</p>' +
+      '<p style="font-size:12px;color:#9880b8;margin-bottom:8px">You need a GitHub token to post. Create one at <a href="https://github.com/settings/tokens/new?scopes=public_repo&description=Nexus" target="_blank" style="color:#7c3aed">GitHub Tokens</a> with <strong style="color:#c4b5fd">public_repo</strong> scope.</p>' +
+      '<button id="tutorial-btn" style="background:none;border:1px solid #2a1f40;border-radius:3px;padding:5px 10px;font-size:11px;color:#8870a8;cursor:pointer;font-family:inherit;margin-bottom:10px;transition:border-color .15s,color .15s" onmouseover="this.style.borderColor=\'#7c3aed\';this.style.color=\'#c4b5fd\'" onmouseout="this.style.borderColor=\'#2a1f40\';this.style.color=\'#8870a8\'">\u25b6 How to get a token</button>' +
+      '<div id="tutorial-steps" style="display:none;font-size:11px;color:#9880b8;line-height:1.7;margin-bottom:10px;padding:10px;background:rgba(26,16,48,.5);border:1px solid #2a1f40;border-radius:3px">' +
+      '<strong style="color:#c4b5fd">Step 1:</strong> Click the link above to open GitHub Token settings<br>' +
+      '<strong style="color:#c4b5fd">Step 2:</strong> Give it a name (e.g. "Nexus")<br>' +
+      '<strong style="color:#c4b5fd">Step 3:</strong> Under <em>Repository access</em>, select <strong style="color:#c4b5fd">Public Repositories</strong> (or "All repositories")<br>' +
+      '<strong style="color:#c4b5fd">Step 4:</strong> Under <em>Permissions</em>, set <strong style="color:#c4b5fd">Issues</strong> to <strong style="color:#c4b5fd">Read and Write</strong><br>' +
+      '<strong style="color:#c4b5fd">Step 5:</strong> Click <strong style="color:#c4b5fd">Generate token</strong> and copy the token (starts with <strong style="color:#c4b5fd">github_pat_</strong>)<br>' +
+      '<strong style="color:#c4b5fd">Step 6:</strong> Paste it above and click <strong style="color:#c4b5fd">Save</strong></div>' +
       '<div class="token-input">' +
-      '<input type="password" id="token-field" placeholder="ghp_..." autocomplete="off">' +
+      '<input type="password" id="token-field" placeholder="github_pat_..." autocomplete="off">' +
       '<button id="token-save-btn">Save</button></div>' +
       '<div id="token-status" class="status-msg"></div>';
     document.getElementById('modal-title').textContent = 'GitHub Token';
@@ -135,6 +143,17 @@ function openForm(type) {
     document.getElementById('token-save-btn').addEventListener('click', saveToken);
     document.getElementById('token-field').addEventListener('keydown', function(e) {
       if (e.key === 'Enter') saveToken();
+    });
+    document.getElementById('tutorial-btn').addEventListener('click', function() {
+      var steps = document.getElementById('tutorial-steps');
+      var btn = document.getElementById('tutorial-btn');
+      if (steps.style.display === 'none') {
+        steps.style.display = 'block';
+        btn.textContent = '\u25bc How to get a token';
+      } else {
+        steps.style.display = 'none';
+        btn.textContent = '\u25b6 How to get a token';
+      }
     });
     return;
   }
