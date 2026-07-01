@@ -1,0 +1,28 @@
+name: Review
+description: Share your experience with Nexus
+labels: [review]
+body:
+  - type: dropdown
+    id: rating
+    attributes:
+      label: Rating
+      options:
+        - ★★★★★
+        - ★★★★☆
+        - ★★★☆☆
+        - ★★☆☆☆
+        - ★☆☆☆☆
+    validations:
+      required: true
+  - type: textarea
+    id: experience
+    attributes:
+      label: Your experience
+      description: What worked well? What didn't?
+    validations:
+      required: true
+  - type: textarea
+    id: system
+    attributes:
+      label: System specs (optional)
+      description: CPU, GPU, Windows version

@@ -13,14 +13,26 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#07050d;color:#e0d8f
 .topbar{position:fixed;top:16px;right:24px;z-index:3;display:flex;gap:8px}
 .topbtn{display:inline-flex;align-items:center;gap:6px;background:#1a1030;color:#8870a8;border:1px solid #2a1f40;border-radius:4px;padding:8px 14px;font-size:12px;font-weight:600;text-decoration:none;cursor:pointer;transition:border-color .15s,color .15s;letter-spacing:.5px}
 .topbtn:hover{border-color:#7c3aed;color:#c4b5fd}
-.content{position:relative;z-index:2;width:100%;max-width:600px;padding:60px 24px;display:flex;flex-direction:column;align-items:center;gap:28px}
+.content{position:relative;z-index:2;width:100%;max-width:620px;padding:60px 24px;display:flex;flex-direction:column;align-items:center;gap:28px}
 .logo{display:flex;flex-direction:column;align-items:center;gap:6px}
 .logo img{width:48px;height:48px}
 .logo h1{font-size:20px;font-weight:800;letter-spacing:5px;color:#c4b5fd}
-h2{font-size:14px;font-weight:700;color:#c4b5fd;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+h2{font-size:14px;font-weight:700;color:#c4b5fd;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;text-align:center}
 p{font-size:13px;color:#9880b8;line-height:1.7;text-align:center}
 hr{width:40px;height:1px;border:none;background:#2a1f40}
-.comments{width:100%;background:rgba(26,16,48,.5);border:1px solid #2a1f40;border-radius:6px;padding:20px;min-height:200px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.action-btn{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:6px;font-size:13px;font-weight:700;text-decoration:none;border:none;cursor:pointer;transition:opacity .15s;letter-spacing:.5px}
+.action-btn:hover{opacity:.8}
+.action-btn.review{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff}
+.action-btn.suggest{background:#1a1030;color:#c4b5fd;border:1px solid #2a1f40}
+.reviews-list{width:100%;display:flex;flex-direction:column;gap:8px}
+.review-card{background:rgba(26,16,48,.5);border:1px solid #2a1f40;border-radius:6px;padding:14px 16px;text-align:left}
+.review-card .title{font-size:13px;font-weight:600;color:#c4b5fd;margin-bottom:4px}
+.review-card .title a{color:#c4b5fd;text-decoration:none}
+.review-card .title a:hover{color:#b366ff}
+.review-card .meta{font-size:11px;color:#554070}
+.review-card .body{font-size:12px;color:#9880b8;margin-top:6px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.loading{font-size:12px;color:#554070}
 </style>
 </head>
 <body>
@@ -36,23 +48,59 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
     <h1>REVIEWS</h1>
   </div>
 
-  <p>Leave a review, report a bug, or suggest a feature. Comments are stored as GitHub Issues.</p>
+  <p>Share your experience or suggest something new. All feedback goes to GitHub Issues.</p>
 
-  <hr>
-
-  <div class="comments">
-    <script src="https://utteranc.es/client.js"
-            repo="ValTheOneAndOnly/nexus-site"
-            issue-term="title"
-            theme="photon-dark"
-            crossorigin="anonymous"
-            async>
-    </script>
+  <div class="actions">
+    <a href="https://github.com/ValTheOneAndOnly/nexus-site/issues/new?template=review.yml&title=Review:" class="action-btn review">★ Write a Review</a>
+    <a href="https://github.com/ValTheOneAndOnly/nexus-site/issues/new?template=suggestion.yml&title=Suggestion:" class="action-btn suggest">Suggest a Feature</a>
   </div>
 
   <hr>
 
-  <p style="font-size:11px;color:#554070">ValTheOneAndOnly &middot; 2026</p>
+  <h2>Recent Reviews</h2>
+  <div class="reviews-list" id="reviews-list">
+    <div class="loading">Loading...</div>
+  </div>
+
+  <hr>
+
+  <p style="font-size:11px;color:#554070">ValTheOneAndOnly · 2026</p>
 </div>
+
+<script>
+async function loadReviews() {
+  try {
+    let res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues?state=all&per_page=20&sort=created&direction=desc');
+    if (!res.ok) throw new Error('fetch failed');
+    let issues = await res.json();
+    let container = document.getElementById('reviews-list');
+    container.innerHTML = '';
+    if (issues.length === 0) {
+      container.innerHTML = '<p style="font-size:12px;color:#554070">No reviews yet. Be the first!</p>';
+      return;
+    }
+    for (let issue of issues) {
+      let card = document.createElement('div');
+      card.className = 'review-card';
+      let body = (issue.body || '').slice(0, 300);
+      let date = new Date(issue.created_at).toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'});
+      card.innerHTML = `
+        <div class="title"><a href="${issue.html_url}" target="_blank">${escapeHtml(issue.title)}</a></div>
+        <div class="meta">by ${escapeHtml(issue.user.login)} · ${date} ${issue.state === 'closed' ? '· resolved' : ''}</div>
+        ${body ? `<div class="body">${escapeHtml(body)}</div>` : ''}
+      `;
+      container.appendChild(card);
+    }
+  } catch (e) {
+    document.getElementById('reviews-list').innerHTML = '<p style="font-size:12px;color:#554070">Could not load reviews. <a href="https://github.com/ValTheOneAndOnly/nexus-site/issues" style="color:#7c3aed;text-decoration:none">View on GitHub →</a></p>';
+  }
+}
+function escapeHtml(s) {
+  let d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+loadReviews();
+</script>
 </body>
 </html>

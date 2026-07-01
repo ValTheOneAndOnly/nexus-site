@@ -1,0 +1,16 @@
+name: Suggestion
+description: Suggest a feature or improvement
+labels: [suggestion]
+body:
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Your idea
+      description: What would you like to see added or changed?
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: Why this helps
+      description: How would this improve Nexus?
