@@ -314,7 +314,7 @@ async function submitForm() {
 
 async function loadReviews() {
   try {
-    let res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues?labels=review&state=open&per_page=20&sort=created&direction=desc');
+    let res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues?labels=review&state=open&per_page=20&sort=created&direction=desc&_=' + Date.now());
     if (!res.ok) throw new Error('fetch failed');
     let issues = await res.json();
     let container = document.getElementById('reviews-list');
@@ -347,7 +347,7 @@ async function loadReviews() {
 
 async function loadSuggestions() {
   try {
-    let res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues?labels=suggestion&state=open&per_page=20&sort=created&direction=desc');
+    let res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues?labels=suggestion&state=open&per_page=20&sort=created&direction=desc&_=' + Date.now());
     if (!res.ok) throw new Error('fetch failed');
     let issues = await res.json();
     let container = document.getElementById('suggestions-list');
