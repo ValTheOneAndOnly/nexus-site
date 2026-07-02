@@ -114,6 +114,7 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
 
 <script>
 let mode = 'review';
+let _isAdmin = false;
 
 function getToken() {
   return localStorage.getItem('nexus_gh_token');
@@ -334,7 +335,7 @@ async function loadReviews() {
       if (fields.experience) extra += '<div class="body">' + escapeHtml(fields.experience) + '</div>';
       card.innerHTML =
         '<div class="title" style="display:flex;align-items:center;gap:6px"><a href="' + issue.html_url + '" target="_blank" style="flex:1">' + escapeHtml(issue.title) + '</a>' +
-        '<span style="font-size:13px;color:#ef4444;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity=\'.6\'" onmouseout="this.style.opacity=\'1\'" onclick="deleteIssue(' + issue.number + ', event)">\u{1F5D1}</span>' +
+        (_isAdmin ? '<span style="font-size:13px;color:#ef4444;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity=\'.6\'" onmouseout="this.style.opacity=\'1\'" onclick="deleteIssue(' + issue.number + ', event)">\u{1F5D1}</span>' : '') +
         '</div>' +
         '<div class="meta">by ' + escapeHtml(issue.user.login) + ' \u00b7 ' + date + (issue.state === 'closed' ? ' \u00b7 resolved' : '') + '</div>' +
         extra;
@@ -367,7 +368,7 @@ async function loadSuggestions() {
       if (fields.reason) extra += '<div class="body" style="margin-top:2px">Why: ' + escapeHtml(fields.reason) + '</div>';
       card.innerHTML =
         '<div class="title" style="display:flex;align-items:center;gap:6px"><a href="' + issue.html_url + '" target="_blank" style="flex:1">' + escapeHtml(issue.title) + '</a>' +
-        '<span style="font-size:13px;color:#ef4444;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity=\'.6\'" onmouseout="this.style.opacity=\'1\'" onclick="deleteIssue(' + issue.number + ', event)">\u{1F5D1}</span>' +
+        (_isAdmin ? '<span style="font-size:13px;color:#ef4444;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity=\'.6\'" onmouseout="this.style.opacity=\'1\'" onclick="deleteIssue(' + issue.number + ', event)">\u{1F5D1}</span>' : '') +
         '</div>' +
         '<div class="meta">by ' + escapeHtml(issue.user.login) + ' \u00b7 ' + date + (issue.state === 'closed' ? ' \u00b7 resolved' : '') + '</div>' +
         extra;
@@ -378,28 +379,34 @@ async function loadSuggestions() {
   }
 }
 
-function deleteIssue(num, e) {
-  e.stopPropagation();
+function checkAdmin() {
   var token = getToken();
-  if (!token) { alert('Set up a token first.'); return; }
-  if (!confirm('Delete this item?')) return;
-  fetch('https://api.github.com/user', {
+  if (!token) return Promise.resolve();
+  return fetch('https://api.github.com/user', {
     headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github.v3+json' }
   }).then(function(r) {
-    if (!r.ok) { alert('Token invalid.'); return; }
+    if (!r.ok) return null;
     return r.json();
   }).then(function(user) {
-    if (!user || user.login !== 'ValTheOneAndOnly') { alert('Only the repo owner can delete.'); return; }
-    fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues/' + num, {
-      method: 'PATCH',
-      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
-      body: JSON.stringify({ state: 'closed' })
-    }).then(function(r) {
-      if (!r.ok) { alert('Delete failed.'); return; }
-      loadReviews();
-      loadSuggestions();
-    }).catch(function() { alert('Network error.'); });
-  }).catch(function() { alert('Could not verify identity.'); });
+    if (user && user.login === 'ValTheOneAndOnly') _isAdmin = true;
+  }).catch(function() {});
+}
+
+function deleteIssue(num, e) {
+  e.stopPropagation();
+  if (!_isAdmin) return;
+  var token = getToken();
+  if (!token) return;
+  if (!confirm('Delete this item?')) return;
+  fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues/' + num, {
+    method: 'PATCH',
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+    body: JSON.stringify({ state: 'closed' })
+  }).then(function(r) {
+    if (!r.ok) return;
+    loadReviews();
+    loadSuggestions();
+  }).catch(function() {});
 }
 
 function parseReviewBody(body) {
@@ -444,8 +451,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
   document.getElementById('modal-bg').addEventListener('click', closeForm);
 
-  loadReviews();
-  loadSuggestions();
+  checkAdmin().then(function() {
+    loadReviews();
+    loadSuggestions();
+  });
 });
 </script>
 </body>
