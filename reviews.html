@@ -334,7 +334,7 @@ async function loadReviews() {
       if (fields.rating) extra += '<div style="font-size:16px;margin:2px 0 2px 0">' + escapeHtml(fields.rating) + '</div>';
       if (fields.experience) extra += '<div class="body">' + escapeHtml(fields.experience) + '</div>';
       card.innerHTML =
-        '<div class="title"><a href="' + issue.html_url + '" target="_blank">' + escapeHtml(issue.title) + '</a></div>' +
+        '<div class="title" style="display:flex;align-items:center;gap:6px"><a href="' + issue.html_url + '" target="_blank" style="flex:1">' + escapeHtml(issue.title) + '</a><a href="' + issue.html_url + '" target="_blank" style="font-size:13px;color:#554070;text-decoration:none;display:flex;align-items:center;gap:3px;transition:color .15s" onmouseover="this.style.color=\'#c4b5fd\'" onmouseout="this.style.color=\'#554070\'">\u{1F4AC}<span style="font-size:11px">' + (issue.comments || 0) + '</span></a></div>' +
         '<div class="meta">by ' + escapeHtml(issue.user.login) + ' \u00b7 ' + date + (issue.state === 'closed' ? ' \u00b7 resolved' : '') + '</div>' +
         extra;
       container.appendChild(card);
@@ -365,7 +365,7 @@ async function loadSuggestions() {
       if (fields.idea) extra += '<div style="font-size:12px;margin:2px 0 0 0;color:#e0d8f0">' + escapeHtml(fields.idea) + '</div>';
       if (fields.reason) extra += '<div class="body" style="margin-top:2px">Why: ' + escapeHtml(fields.reason) + '</div>';
       card.innerHTML =
-        '<div class="title"><a href="' + issue.html_url + '" target="_blank">' + escapeHtml(issue.title) + '</a></div>' +
+        '<div class="title" style="display:flex;align-items:center;gap:6px"><a href="' + issue.html_url + '" target="_blank" style="flex:1">' + escapeHtml(issue.title) + '</a><a href="' + issue.html_url + '" target="_blank" style="font-size:13px;color:#554070;text-decoration:none;display:flex;align-items:center;gap:3px;transition:color .15s" onmouseover="this.style.color=\'#c4b5fd\'" onmouseout="this.style.color=\'#554070\'">\u{1F4AC}<span style="font-size:11px">' + (issue.comments || 0) + '</span></a></div>' +
         '<div class="meta">by ' + escapeHtml(issue.user.login) + ' \u00b7 ' + date + (issue.state === 'closed' ? ' \u00b7 resolved' : '') + '</div>' +
         extra;
       container.appendChild(card);
