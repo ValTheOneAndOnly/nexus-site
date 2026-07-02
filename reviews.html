@@ -90,6 +90,13 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
 
   <hr>
 
+  <h2>Suggestions</h2>
+  <div class="reviews-list" id="suggestions-list">
+    <div class="loading">Loading...</div>
+  </div>
+
+  <hr>
+
   <div class="logo" style="gap:4px">
     <img src="icon.png" alt="Nexus" style="width:32px;height:32px">
     <h1 style="font-size:14px;letter-spacing:4px">NEXUS</h1>
@@ -296,7 +303,9 @@ async function submitForm() {
     status.className = 'status-msg success';
     setTimeout(function() {
       closeForm();
-      loadReviews();
+  loadReviews();
+  loadSuggestions();
+      loadSuggestions();
     }, 1200);
   } catch (e) {
     status.textContent = 'Network error: ' + e.message;
@@ -332,6 +341,37 @@ async function loadReviews() {
     }
   } catch (e) {
     document.getElementById('reviews-list').innerHTML = '<p style="font-size:12px;color:#554070;padding:8px 0">Could not load reviews. <a href="https://github.com/ValTheOneAndOnly/nexus-site/issues">View on GitHub \u2192</a></p>';
+  }
+}
+
+async function loadSuggestions() {
+  try {
+    let res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues?labels=suggestion&per_page=20&sort=created&direction=desc');
+    if (!res.ok) throw new Error('fetch failed');
+    let issues = await res.json();
+    let container = document.getElementById('suggestions-list');
+    container.innerHTML = '';
+    if (issues.length === 0) {
+      container.innerHTML = '<p style="font-size:12px;color:#554070;padding:8px 0">No suggestions yet. Be the first!</p>';
+      return;
+    }
+    for (let issue of issues) {
+      if (issue.pull_request) continue;
+      let card = document.createElement('div');
+      card.className = 'review-card';
+      let fields = parseReviewBody(issue.body || '');
+      let date = new Date(issue.created_at).toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'});
+      let extra = '';
+      if (fields.idea) extra += '<div style="font-size:12px;margin:2px 0 0 0;color:#e0d8f0">' + escapeHtml(fields.idea) + '</div>';
+      if (fields.reason) extra += '<div class="body" style="margin-top:2px">Why: ' + escapeHtml(fields.reason) + '</div>';
+      card.innerHTML =
+        '<div class="title"><a href="' + issue.html_url + '" target="_blank">' + escapeHtml(issue.title) + '</a></div>' +
+        '<div class="meta">by ' + escapeHtml(issue.user.login) + ' \u00b7 ' + date + (issue.state === 'closed' ? ' \u00b7 resolved' : '') + '</div>' +
+        extra;
+      container.appendChild(card);
+    }
+  } catch (e) {
+    document.getElementById('suggestions-list').innerHTML = '<p style="font-size:12px;color:#554070;padding:8px 0">Could not load suggestions. <a href="https://github.com/ValTheOneAndOnly/nexus-site/issues">View on GitHub \u2192</a></p>';
   }
 }
 
