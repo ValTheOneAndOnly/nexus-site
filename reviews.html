@@ -114,7 +114,6 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
 
 <script>
 let mode = 'review';
-let _isAdmin = false;
 
 function getToken() {
   return localStorage.getItem('nexus_gh_token');
@@ -335,7 +334,7 @@ async function loadReviews() {
       if (fields.experience) extra += '<div class="body">' + escapeHtml(fields.experience) + '</div>';
       card.innerHTML =
         '<div class="title" style="display:flex;align-items:center;gap:6px"><a href="' + issue.html_url + '" target="_blank" style="flex:1">' + escapeHtml(issue.title) + '</a>' +
-        (_isAdmin ? '<span style="font-size:13px;color:#ef4444;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity=\'.6\'" onmouseout="this.style.opacity=\'1\'" onclick="deleteIssue(' + issue.number + ', event)">\u{1F5D1}</span>' : '') +
+        '<span style="font-size:13px;color:#ef4444;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity=\'.6\'" onmouseout="this.style.opacity=\'1\'" onclick="deleteIssue(' + issue.number + ', event)">\u{1F5D1}</span>' +
         '</div>' +
         '<div class="meta">by ' + escapeHtml(issue.user.login) + ' \u00b7 ' + date + (issue.state === 'closed' ? ' \u00b7 resolved' : '') + '</div>' +
         extra;
@@ -368,7 +367,7 @@ async function loadSuggestions() {
       if (fields.reason) extra += '<div class="body" style="margin-top:2px">Why: ' + escapeHtml(fields.reason) + '</div>';
       card.innerHTML =
         '<div class="title" style="display:flex;align-items:center;gap:6px"><a href="' + issue.html_url + '" target="_blank" style="flex:1">' + escapeHtml(issue.title) + '</a>' +
-        (_isAdmin ? '<span style="font-size:13px;color:#ef4444;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity=\'.6\'" onmouseout="this.style.opacity=\'1\'" onclick="deleteIssue(' + issue.number + ', event)">\u{1F5D1}</span>' : '') +
+        '<span style="font-size:13px;color:#ef4444;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity=\'.6\'" onmouseout="this.style.opacity=\'1\'" onclick="deleteIssue(' + issue.number + ', event)">\u{1F5D1}</span>' +
         '</div>' +
         '<div class="meta">by ' + escapeHtml(issue.user.login) + ' \u00b7 ' + date + (issue.state === 'closed' ? ' \u00b7 resolved' : '') + '</div>' +
         extra;
@@ -379,35 +378,20 @@ async function loadSuggestions() {
   }
 }
 
-async function checkAdmin() {
-  var token = getToken();
-  if (!token) return;
-  try {
-    var res = await fetch('https://api.github.com/user', {
-      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github.v3+json' }
-    });
-    if (!res.ok) return;
-    var user = await res.json();
-    if (user.login === 'ValTheOneAndOnly') _isAdmin = true;
-  } catch (e) {}
-}
-
-async function deleteIssue(num, e) {
+function deleteIssue(num, e) {
   e.stopPropagation();
-  if (!_isAdmin) return;
-  if (!confirm('Delete this item?')) return;
   var token = getToken();
-  if (!token) return;
-  try {
-    var res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues/' + num, {
-      method: 'PATCH',
-      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
-      body: JSON.stringify({ state: 'closed' })
-    });
-    if (!res.ok) return;
+  if (!token) { alert('Set up a token to delete.'); return; }
+  if (!confirm('Delete this item?')) return;
+  fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues/' + num, {
+    method: 'PATCH',
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+    body: JSON.stringify({ state: 'closed' })
+  }).then(function(r) {
+    if (!r.ok) { alert('Could not delete. Only the repo owner can delete.'); return; }
     loadReviews();
     loadSuggestions();
-  } catch (e) {}
+  }).catch(function() { alert('Network error.'); });
 }
 
 function parseReviewBody(body) {
@@ -452,10 +436,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   document.getElementById('modal-bg').addEventListener('click', closeForm);
 
-  checkAdmin().then(function() {
-    loadReviews();
-    loadSuggestions();
-  });
+  loadReviews();
+  loadSuggestions();
 });
 </script>
 </body>
