@@ -114,6 +114,7 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
 
 <script>
 let mode = 'review';
+let _isAdmin = false;
 
 function getToken() {
   return localStorage.getItem('nexus_gh_token');
@@ -314,7 +315,7 @@ async function submitForm() {
 
 async function loadReviews() {
   try {
-    let res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues?labels=review&per_page=20&sort=created&direction=desc');
+    let res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues?labels=review&state=open&per_page=20&sort=created&direction=desc');
     if (!res.ok) throw new Error('fetch failed');
     let issues = await res.json();
     let container = document.getElementById('reviews-list');
@@ -333,7 +334,9 @@ async function loadReviews() {
       if (fields.rating) extra += '<div style="font-size:16px;margin:2px 0 2px 0">' + escapeHtml(fields.rating) + '</div>';
       if (fields.experience) extra += '<div class="body">' + escapeHtml(fields.experience) + '</div>';
       card.innerHTML =
-        '<div class="title"><a href="' + issue.html_url + '" target="_blank">' + escapeHtml(issue.title) + '</a></div>' +
+        '<div class="title" style="display:flex;align-items:center;gap:6px"><a href="' + issue.html_url + '" target="_blank" style="flex:1">' + escapeHtml(issue.title) + '</a>' +
+        (_isAdmin ? '<span style="font-size:13px;color:#ef4444;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity=\'.6\'" onmouseout="this.style.opacity=\'1\'" onclick="deleteIssue(' + issue.number + ', event)">\u{1F5D1}</span>' : '') +
+        '</div>' +
         '<div class="meta">by ' + escapeHtml(issue.user.login) + ' \u00b7 ' + date + (issue.state === 'closed' ? ' \u00b7 resolved' : '') + '</div>' +
         extra;
       container.appendChild(card);
@@ -345,7 +348,7 @@ async function loadReviews() {
 
 async function loadSuggestions() {
   try {
-    let res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues?labels=suggestion&per_page=20&sort=created&direction=desc');
+    let res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues?labels=suggestion&state=open&per_page=20&sort=created&direction=desc');
     if (!res.ok) throw new Error('fetch failed');
     let issues = await res.json();
     let container = document.getElementById('suggestions-list');
@@ -364,7 +367,9 @@ async function loadSuggestions() {
       if (fields.idea) extra += '<div style="font-size:12px;margin:2px 0 0 0;color:#e0d8f0">' + escapeHtml(fields.idea) + '</div>';
       if (fields.reason) extra += '<div class="body" style="margin-top:2px">Why: ' + escapeHtml(fields.reason) + '</div>';
       card.innerHTML =
-        '<div class="title"><a href="' + issue.html_url + '" target="_blank">' + escapeHtml(issue.title) + '</a></div>' +
+        '<div class="title" style="display:flex;align-items:center;gap:6px"><a href="' + issue.html_url + '" target="_blank" style="flex:1">' + escapeHtml(issue.title) + '</a>' +
+        (_isAdmin ? '<span style="font-size:13px;color:#ef4444;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity=\'.6\'" onmouseout="this.style.opacity=\'1\'" onclick="deleteIssue(' + issue.number + ', event)">\u{1F5D1}</span>' : '') +
+        '</div>' +
         '<div class="meta">by ' + escapeHtml(issue.user.login) + ' \u00b7 ' + date + (issue.state === 'closed' ? ' \u00b7 resolved' : '') + '</div>' +
         extra;
       container.appendChild(card);
@@ -372,6 +377,37 @@ async function loadSuggestions() {
   } catch (e) {
     document.getElementById('suggestions-list').innerHTML = '<p style="font-size:12px;color:#554070;padding:8px 0">Could not load suggestions. <a href="https://github.com/ValTheOneAndOnly/nexus-site/issues">View on GitHub \u2192</a></p>';
   }
+}
+
+async function checkAdmin() {
+  var token = getToken();
+  if (!token) return;
+  try {
+    var res = await fetch('https://api.github.com/user', {
+      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (!res.ok) return;
+    var user = await res.json();
+    if (user.login === 'ValTheOneAndOnly') _isAdmin = true;
+  } catch (e) {}
+}
+
+async function deleteIssue(num, e) {
+  e.stopPropagation();
+  if (!_isAdmin) return;
+  if (!confirm('Delete this item?')) return;
+  var token = getToken();
+  if (!token) return;
+  try {
+    var res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues/' + num, {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+      body: JSON.stringify({ state: 'closed' })
+    });
+    if (!res.ok) return;
+    loadReviews();
+    loadSuggestions();
+  } catch (e) {}
 }
 
 function parseReviewBody(body) {
@@ -416,8 +452,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
   document.getElementById('modal-bg').addEventListener('click', closeForm);
 
-  loadReviews();
-  loadSuggestions();
+  checkAdmin().then(function() {
+    loadReviews();
+    loadSuggestions();
+  });
 });
 </script>
 </body>
