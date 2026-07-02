@@ -312,8 +312,7 @@ async function submitForm() {
     status.className = 'status-msg success';
     setTimeout(function() {
       closeForm();
-  loadReviews();
-  loadSuggestions();
+      loadReviews();
       loadSuggestions();
     }, 1200);
   } catch (e) {
@@ -496,6 +495,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('modal-bg').addEventListener('click', closeForm);
 
   loadReviews();
+  loadSuggestions();
 });
 </script>
 </body>
