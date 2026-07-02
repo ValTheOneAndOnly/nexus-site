@@ -32,6 +32,15 @@ hr{width:40px;height:1px;border:none;background:#2a1f40}
 .review-card .title a:hover{color:#b366ff}
 .review-card .meta{font-size:11px;color:#554070;margin-bottom:2px}
 .review-card .body{font-size:12px;color:#9880b8;line-height:1.6}
+.comments-section{padding:8px 0 4px 0;border-top:1px solid #2a1f40;margin-top:6px;font-size:12px}
+.comment{color:#9880b8;padding:4px 0;border-bottom:1px solid rgba(42,31,64,.5)}
+.comment .author{color:#c4b5fd;font-weight:600;font-size:11px}
+.comment .text{color:#9880b8;font-size:12px;line-height:1.5;margin-top:1px}
+.comment-form{display:flex;gap:6px;margin-top:6px}
+.comment-form input{flex:1;background:#0d0820;border:1px solid #2a1f40;border-radius:3px;padding:6px 8px;font-size:12px;color:#e0d8f0;font-family:inherit;outline:none}
+.comment-form input:focus{border-color:#7c3aed}
+.comment-form button{background:#7c3aed;border:none;border-radius:3px;padding:6px 10px;font-size:11px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.comment-form button:hover{opacity:.85}
 .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 .action-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:4px;font-size:12px;font-weight:600;border:1px solid #2a1f40;background:#1a1030;color:#8870a8;cursor:pointer;transition:border-color .15s,color .15s;letter-spacing:.5px;font-family:inherit}
 .action-btn:hover{border-color:#7c3aed;color:#c4b5fd}
@@ -334,9 +343,11 @@ async function loadReviews() {
       if (fields.rating) extra += '<div style="font-size:16px;margin:2px 0 2px 0">' + escapeHtml(fields.rating) + '</div>';
       if (fields.experience) extra += '<div class="body">' + escapeHtml(fields.experience) + '</div>';
       card.innerHTML =
-        '<div class="title" style="display:flex;align-items:center;gap:6px"><a href="' + issue.html_url + '" target="_blank" style="flex:1">' + escapeHtml(issue.title) + '</a><a href="' + issue.html_url + '" target="_blank" style="font-size:13px;color:#554070;text-decoration:none;display:flex;align-items:center;gap:3px;transition:color .15s" onmouseover="this.style.color=\'#c4b5fd\'" onmouseout="this.style.color=\'#554070\'">\u{1F4AC}<span style="font-size:11px">' + (issue.comments || 0) + '</span></a></div>' +
+        '<div class="title" style="display:flex;align-items:center;gap:6px"><a href="' + issue.html_url + '" target="_blank" style="flex:1">' + escapeHtml(issue.title) + '</a>' +
+        '<span style="font-size:13px;color:#554070;display:flex;align-items:center;gap:3px;cursor:pointer;transition:color .15s" onmouseover="this.style.color=\'#c4b5fd\'" onmouseout="this.style.color=\'#554070\'" onclick="toggleComments(event, \'' + issue.number + '\', this)">\u{1F4AC}<span style="font-size:11px">' + (issue.comments || 0) + '</span></span></div>' +
         '<div class="meta">by ' + escapeHtml(issue.user.login) + ' \u00b7 ' + date + (issue.state === 'closed' ? ' \u00b7 resolved' : '') + '</div>' +
-        extra;
+        extra +
+        '<div class="comments-section" id="comments-' + issue.number + '" style="display:none"></div>';
       container.appendChild(card);
     }
   } catch (e) {
@@ -365,14 +376,81 @@ async function loadSuggestions() {
       if (fields.idea) extra += '<div style="font-size:12px;margin:2px 0 0 0;color:#e0d8f0">' + escapeHtml(fields.idea) + '</div>';
       if (fields.reason) extra += '<div class="body" style="margin-top:2px">Why: ' + escapeHtml(fields.reason) + '</div>';
       card.innerHTML =
-        '<div class="title" style="display:flex;align-items:center;gap:6px"><a href="' + issue.html_url + '" target="_blank" style="flex:1">' + escapeHtml(issue.title) + '</a><a href="' + issue.html_url + '" target="_blank" style="font-size:13px;color:#554070;text-decoration:none;display:flex;align-items:center;gap:3px;transition:color .15s" onmouseover="this.style.color=\'#c4b5fd\'" onmouseout="this.style.color=\'#554070\'">\u{1F4AC}<span style="font-size:11px">' + (issue.comments || 0) + '</span></a></div>' +
+        '<div class="title" style="display:flex;align-items:center;gap:6px"><a href="' + issue.html_url + '" target="_blank" style="flex:1">' + escapeHtml(issue.title) + '</a>' +
+        '<span style="font-size:13px;color:#554070;display:flex;align-items:center;gap:3px;cursor:pointer;transition:color .15s" onmouseover="this.style.color=\'#c4b5fd\'" onmouseout="this.style.color=\'#554070\'" onclick="toggleComments(event, \'' + issue.number + '\', this)">\u{1F4AC}<span style="font-size:11px">' + (issue.comments || 0) + '</span></span></div>' +
         '<div class="meta">by ' + escapeHtml(issue.user.login) + ' \u00b7 ' + date + (issue.state === 'closed' ? ' \u00b7 resolved' : '') + '</div>' +
-        extra;
+        extra +
+        '<div class="comments-section" id="comments-' + issue.number + '" style="display:none"></div>';
       container.appendChild(card);
     }
   } catch (e) {
     document.getElementById('suggestions-list').innerHTML = '<p style="font-size:12px;color:#554070;padding:8px 0">Could not load suggestions. <a href="https://github.com/ValTheOneAndOnly/nexus-site/issues">View on GitHub \u2192</a></p>';
   }
+}
+
+async function toggleComments(e, num, el) {
+  e.stopPropagation();
+  var section = document.getElementById('comments-' + num);
+  if (section.style.display !== 'none') {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+  if (section.dataset.loaded) return;
+  section.innerHTML = '<div class="loading" style="font-size:11px;padding:4px 0">Loading comments...</div>';
+  try {
+    var res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues/' + num + '/comments?per_page=10&sort=created');
+    if (!res.ok) throw new Error('fetch failed');
+    var comments = await res.json();
+    var html = '';
+    if (comments.length === 0) {
+      html = '<div style="font-size:11px;color:#554070;padding:4px 0">No comments yet.</div>';
+    } else {
+      for (var c of comments) {
+        if (c.user) html += '<div class="comment"><span class="author">' + escapeHtml(c.user.login) + '</span><div class="text">' + escapeHtml(c.body) + '</div></div>';
+      }
+    }
+    var token = getToken();
+    if (token) {
+      html += '<div class="comment-form"><input type="text" id="comment-input-' + num + '" placeholder="Write a comment..." autocomplete="off"><button onclick="postComment(\'' + num + '\')">Post</button></div>';
+    } else {
+      html += '<div style="font-size:11px;color:#554070;margin-top:6px"><a href="#" style="color:#7c3aed;text-decoration:none" onclick="openForm(\'review\');return false">Set up a token</a> to comment.</div>';
+    }
+    section.innerHTML = html;
+    section.dataset.loaded = '1';
+  } catch (e) {
+    section.innerHTML = '<div style="font-size:11px;color:#ef4444;padding:4px 0">Failed to load comments.</div>';
+  }
+}
+
+async function postComment(num) {
+  var input = document.getElementById('comment-input-' + num);
+  var text = input.value.trim();
+  if (!text) return;
+  var token = getToken();
+  if (!token) return;
+  input.disabled = true;
+  try {
+    var res = await fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues/' + num + '/comments', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+      body: JSON.stringify({ body: text })
+    });
+    if (res.status === 401) {
+      setToken(null);
+      input.placeholder = 'Token expired. Re-open the page.';
+      input.disabled = false;
+      return;
+    }
+    if (!res.ok) { input.placeholder = 'Post failed.'; input.disabled = false; return; }
+    input.value = '';
+    input.disabled = false;
+    var section = document.getElementById('comments-' + num);
+    section.dataset.loaded = '';
+    var countSpan = document.querySelector('[onclick*="' + num + '"] span:last-child');
+    if (countSpan) countSpan.textContent = parseInt(countSpan.textContent) + 1;
+    toggleComments({stopPropagation:function(){}}, num, null);
+  } catch (e) { input.placeholder = 'Network error.'; input.disabled = false; }
 }
 
 function parseReviewBody(body) {
