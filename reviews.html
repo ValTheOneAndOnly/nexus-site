@@ -381,17 +381,25 @@ async function loadSuggestions() {
 function deleteIssue(num, e) {
   e.stopPropagation();
   var token = getToken();
-  if (!token) { alert('Set up a token to delete.'); return; }
+  if (!token) { alert('Set up a token first.'); return; }
   if (!confirm('Delete this item?')) return;
-  fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues/' + num, {
-    method: 'PATCH',
-    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
-    body: JSON.stringify({ state: 'closed' })
+  fetch('https://api.github.com/user', {
+    headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github.v3+json' }
   }).then(function(r) {
-    if (!r.ok) { alert('Could not delete. Only the repo owner can delete.'); return; }
-    loadReviews();
-    loadSuggestions();
-  }).catch(function() { alert('Network error.'); });
+    if (!r.ok) { alert('Token invalid.'); return; }
+    return r.json();
+  }).then(function(user) {
+    if (!user || user.login !== 'ValTheOneAndOnly') { alert('Only the repo owner can delete.'); return; }
+    fetch('https://api.github.com/repos/ValTheOneAndOnly/nexus-site/issues/' + num, {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+      body: JSON.stringify({ state: 'closed' })
+    }).then(function(r) {
+      if (!r.ok) { alert('Delete failed.'); return; }
+      loadReviews();
+      loadSuggestions();
+    }).catch(function() { alert('Network error.'); });
+  }).catch(function() { alert('Could not verify identity.'); });
 }
 
 function parseReviewBody(body) {
